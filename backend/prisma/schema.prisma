@@ -2,8 +2,9 @@
 // Matches pseudo-code data models from docs/pseudo-code/01-data-models.md
 
 generator client {
-  provider = "prisma-client-js"
-  engineType = "binary"
+  provider      = "prisma-client-js"
+  engineType    = "binary"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
