@@ -144,8 +144,22 @@ export default function NotesPage() {
         ...note,
         createdBy: creator ? `${creator.firstName} ${creator.lastName}` : 'Unknown',
         tags: note.tags || [],
-        comments: note.comments || [],
-        lastReadBy: note.readReceipts?.map(r => r.employeeId) || [],
+        comments: (note.comments || []).map(comment => {
+          const commentAuthor = comment.commentById ? employeesMap[comment.commentById] : null;
+          return {
+            id: comment.id,
+            text: comment.text,
+            author: commentAuthor ? `${commentAuthor.firstName} ${commentAuthor.lastName}` : 'Unknown',
+            createdAt: comment.createdAt,
+          };
+        }),
+        lastReadBy: note.readReceipts?.map(r => ({
+          employeeId: r.employeeId,
+          readAt: r.readAt,
+        })) || [],
+        relatedSuite: null, // Not yet implemented
+        relatedTask: null, // Not yet implemented
+        relatedEmployee: null, // Not yet implemented
       } as UINote;
     }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [notesMap, employeesMap]);

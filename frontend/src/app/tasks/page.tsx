@@ -40,7 +40,13 @@ export default function TasksPage() {
   }, [fetchAllTasks]);
 
   // Convert map to array
-  const tasks = useMemo(() => Object.values(tasksMap), [tasksMap]);
+  const tasks = useMemo(() => Object.values(tasksMap).map(task => ({
+    ...task,
+    assignedTo: 'Unassigned', // Not yet implemented
+    createdBy: 'System', // Not yet implemented
+    notes: [], // Not yet implemented
+    checklist: [], // Not yet implemented
+  })), [tasksMap]);
 
   // Filter tasks
   const filteredTasks = useMemo(() => {

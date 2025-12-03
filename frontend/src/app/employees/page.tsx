@@ -40,6 +40,7 @@ export default function EmployeesPage() {
       fullName: `${emp.firstName} ${emp.lastName}`,
       activeTasks: [],
       permissions: emp.permissions || [],
+      avatar: null, // Avatar not yet implemented
     })) as UIEmployee[];
   }, [employeesMap]);
 

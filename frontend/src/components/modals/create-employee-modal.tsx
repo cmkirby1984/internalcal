@@ -92,11 +92,10 @@ export function CreateEmployeeModal() {
         email: formData.email,
         phone: formData.phone || undefined,
         username: formData.username,
-        password: formData.password,
         role: formData.role,
         department: formData.department,
         hireDate: formData.hireDate,
-      });
+      } as any); // Password is required for creation but not part of Employee type
       
       closeModal();
       

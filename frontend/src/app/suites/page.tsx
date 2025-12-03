@@ -39,7 +39,12 @@ export default function SuitesPage() {
   }, [fetchAllSuites]);
 
   // Convert map to array
-  const suites = useMemo(() => Object.values(suitesMap), [suitesMap]);
+  const suites = useMemo(() => Object.values(suitesMap).map(suite => ({
+    ...suite,
+    maxOccupancy: 2, // Default occupancy, not yet in backend
+    activeTasks: [], // Not yet implemented
+    notes: suite.notes ? [suite.notes] : [], // Convert string to array
+  })), [suitesMap]);
 
   // Filter suites
   const filteredSuites = useMemo(() => {
