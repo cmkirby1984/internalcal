@@ -1,0 +1,307 @@
+'use client';
+
+import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardHeader, CardContent, Button } from '@/components/ui';
+import { StatCard, SuiteStatusChart, ActivityFeed, QuickTaskList } from '@/components/dashboard';
+import { useSuitesStore, useTasksStore, useEmployeesStore } from '@/lib/store';
+import { TaskStatus, TaskPriority, SuiteStatus, UITask } from '@/lib/types';
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOCK DATA (Replace with real data from stores)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+const mockActivities = [
+  {
+    id: '1',
+    type: 'task_completed' as const,
+    message: 'Cleaned Suite 204 - Deep cleaning completed',
+    user: { name: 'Maria Garcia' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+  },
+  {
+    id: '2',
+    type: 'suite_cleaned' as const,
+    message: 'Suite 108 marked as Vacant Clean',
+    user: { name: 'John Smith' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+  },
+  {
+    id: '3',
+    type: 'employee_clocked_in' as const,
+    message: 'Started shift for the day',
+    user: { name: 'Sarah Johnson' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+  },
+  {
+    id: '4',
+    type: 'task_assigned' as const,
+    message: 'Maintenance task assigned for Suite 312',
+    user: { name: 'Admin' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
+  },
+  {
+    id: '5',
+    type: 'note_created' as const,
+    message: 'Guest special request noted for Suite 405',
+    user: { name: 'Emily Davis' },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DASHBOARD PAGE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+export default function DashboardPage() {
+  const router = useRouter();
+  
+  // Get data from stores
+  const suitesItems = useSuitesStore((state) => state.items);
+  const tasksItems = useTasksStore((state) => state.items);
+  const employeesItems = useEmployeesStore((state) => state.items);
+
+  // Calculate suite statistics
+  const suiteStats = useMemo(() => {
+    const suitesArray = Object.values(suitesItems);
+    return {
+      total: suitesArray.length || 24, // Default for demo
+      vacantClean: suitesArray.filter(s => s.status === SuiteStatus.VACANT_CLEAN).length || 8,
+      vacantDirty: suitesArray.filter(s => s.status === SuiteStatus.VACANT_DIRTY).length || 4,
+      occupiedClean: suitesArray.filter(s => s.status === SuiteStatus.OCCUPIED_CLEAN).length || 6,
+      occupiedDirty: suitesArray.filter(s => s.status === SuiteStatus.OCCUPIED_DIRTY).length || 3,
+      outOfOrder: suitesArray.filter(s => s.status === SuiteStatus.OUT_OF_ORDER).length || 2,
+      blocked: suitesArray.filter(s => s.status === SuiteStatus.BLOCKED).length || 1,
+    };
+  }, [suitesItems]);
+
+  // Calculate task statistics
+  const taskStats = useMemo(() => {
+    const tasksArray = Object.values(tasksItems);
+    const now = new Date();
+    return {
+      total: tasksArray.length || 18,
+      pending: tasksArray.filter(t => t.status === TaskStatus.PENDING).length || 5,
+      inProgress: tasksArray.filter(t => t.status === TaskStatus.IN_PROGRESS).length || 7,
+      completed: tasksArray.filter(t => t.status === TaskStatus.COMPLETED).length || 4,
+      overdue: tasksArray.filter(t => 
+        t.scheduledEnd && new Date(t.scheduledEnd) < now && 
+        t.status !== TaskStatus.COMPLETED && t.status !== TaskStatus.CANCELLED
+      ).length || 2,
+    };
+  }, [tasksItems]);
+
+  // Get urgent tasks - use empty array since stores are empty, UI shows mock data
+  const urgentTasks: UITask[] = useMemo(() => {
+    // TODO: Replace with actual store data when API is connected
+    return [];
+  }, []);
+
+  // Get my active tasks - use empty array since stores are empty, UI shows mock data
+  const myTasks: UITask[] = useMemo(() => {
+    // TODO: Replace with actual store data when API is connected
+    return [];
+  }, []);
+
+  // Employee stats
+  const employeeStats = useMemo(() => {
+    const employeesArray = Object.values(employeesItems);
+    return {
+      total: employeesArray.length || 12,
+      onDuty: employeesArray.filter(e => e.isOnDuty).length || 6,
+    };
+  }, [employeesItems]);
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Welcome back!</h1>
+          <p className="text-[var(--text-secondary)] mt-1">
+            Here&apos;s what&apos;s happening at your property today.
+          </p>
+        </div>
+        <Button
+          onClick={() => router.push('/tasks')}
+          icon={
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          }
+        >
+          New Task
+        </Button>
+      </div>
+
+      {/* Stats Grid - Suite Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Suites"
+          value={suiteStats.total}
+          icon={
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          }
+          color="info"
+          onClick={() => router.push('/suites')}
+        />
+        <StatCard
+          title="Available"
+          value={suiteStats.vacantClean}
+          icon={
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          }
+          color="success"
+          onClick={() => router.push('/suites?status=VACANT_CLEAN')}
+        />
+        <StatCard
+          title="Needs Cleaning"
+          value={suiteStats.vacantDirty + suiteStats.occupiedDirty}
+          icon={
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+          }
+          color="warning"
+          onClick={() => router.push('/suites?needsCleaning=true')}
+        />
+        <StatCard
+          title="Out of Order"
+          value={suiteStats.outOfOrder}
+          icon={
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          }
+          color="error"
+          onClick={() => router.push('/suites?status=OUT_OF_ORDER')}
+        />
+      </div>
+
+      {/* Stats Grid - Task & Employee Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Active Tasks"
+          value={taskStats.inProgress}
+          icon={
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          }
+          color="info"
+          onClick={() => router.push('/tasks?status=IN_PROGRESS')}
+        />
+        <StatCard
+          title="Completed Today"
+          value={taskStats.completed}
+          icon={
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          color="success"
+          trend={{ value: 12, isPositive: true }}
+        />
+        <StatCard
+          title="Overdue"
+          value={taskStats.overdue}
+          icon={
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          color="error"
+          onClick={() => router.push('/tasks?overdue=true')}
+        />
+        <StatCard
+          title="On Duty"
+          value={`${employeeStats.onDuty}/${employeeStats.total}`}
+          icon={
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          }
+          color="primary"
+          onClick={() => router.push('/employees')}
+        />
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Tasks */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* My Tasks */}
+          <Card padding="lg">
+            <CardHeader
+              title="My Tasks"
+              subtitle={`${myTasks.length} active tasks`}
+              action={
+                <Button variant="ghost" size="sm" onClick={() => router.push('/tasks')}>
+                  View All
+                </Button>
+              }
+            />
+            <CardContent>
+              <QuickTaskList
+                tasks={myTasks}
+                onTaskClick={(task) => router.push(`/tasks/${task.id}`)}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Urgent Tasks */}
+          {urgentTasks.length > 0 && (
+            <Card padding="lg" className="border-l-4 border-l-red-500">
+              <CardHeader
+                title="Urgent Tasks"
+                subtitle="Requires immediate attention"
+                action={
+                  <Button variant="ghost" size="sm" onClick={() => router.push('/tasks?priority=URGENT')}>
+                    View All
+                  </Button>
+                }
+              />
+              <CardContent>
+                <QuickTaskList
+                  tasks={urgentTasks}
+                  onTaskClick={(task) => router.push(`/tasks/${task.id}`)}
+                  compact
+                />
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Suite Status Chart */}
+          <Card padding="lg">
+            <CardHeader title="Suite Status" />
+            <CardContent>
+              <SuiteStatusChart stats={suiteStats} />
+            </CardContent>
+          </Card>
+
+          {/* Recent Activity */}
+          <Card padding="lg">
+            <CardHeader
+              title="Recent Activity"
+              action={
+                <Button variant="ghost" size="sm">
+                  View All
+                </Button>
+              }
+            />
+            <CardContent>
+              <ActivityFeed activities={mockActivities} limit={5} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

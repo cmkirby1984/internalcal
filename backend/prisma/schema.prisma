@@ -1,0 +1,432 @@
+// Prisma schema for Motel Management System
+// Matches pseudo-code data models from docs/pseudo-code/01-data-models.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum SuiteType {
+  STANDARD
+  DELUXE
+  SUITE
+  ACCESSIBLE
+}
+
+enum SuiteStatus {
+  VACANT_CLEAN
+  VACANT_DIRTY
+  OCCUPIED_CLEAN
+  OCCUPIED_DIRTY
+  OUT_OF_ORDER
+  BLOCKED
+}
+
+enum BedConfiguration {
+  SINGLE
+  DOUBLE
+  QUEEN
+  KING
+  TWIN_BEDS
+  QUEEN_PLUS_SOFA
+}
+
+enum TaskType {
+  CLEANING
+  MAINTENANCE
+  INSPECTION
+  LINEN_CHANGE
+  DEEP_CLEAN
+  EMERGENCY
+  CUSTOM
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+  EMERGENCY
+}
+
+enum TaskStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  PAUSED
+  COMPLETED
+  CANCELLED
+  VERIFIED
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum EmployeeRole {
+  HOUSEKEEPER
+  MAINTENANCE
+  FRONT_DESK
+  SUPERVISOR
+  MANAGER
+  ADMIN
+}
+
+enum Department {
+  HOUSEKEEPING
+  MAINTENANCE
+  FRONT_OFFICE
+  MANAGEMENT
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_BREAK
+  OFF_DUTY
+  ON_LEAVE
+  INACTIVE
+}
+
+enum ShiftType {
+  DAY
+  EVENING
+  NIGHT
+}
+
+enum ContactMethod {
+  EMAIL
+  SMS
+  PHONE
+  IN_APP
+}
+
+enum NoteType {
+  GENERAL
+  MAINTENANCE
+  GUEST_REQUEST
+  INCIDENT
+  REMINDER
+  HANDOFF
+}
+
+enum NotePriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NoteVisibility {
+  PRIVATE
+  DEPARTMENT
+  ALL_STAFF
+  MANAGERS_ONLY
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_OVERDUE
+  SUITE_STATUS_CHANGE
+  EMERGENCY_TASK
+  SHIFT_REMINDER
+  NOTE_MENTION
+  SYSTEM_ALERT
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Suite {
+  id          String   @id @default(uuid())
+  suiteNumber String   @unique
+  floor       Int
+  type        SuiteType
+  status      SuiteStatus @default(VACANT_CLEAN)
+
+  // Guest info stored as JSON for flexibility
+  currentGuest Json?
+
+  // Physical attributes
+  bedConfiguration BedConfiguration
+  amenities        String[]
+  squareFeet       Int?
+
+  // Maintenance & cleaning
+  lastCleaned              DateTime?
+  lastInspected            DateTime?
+  nextScheduledMaintenance DateTime?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tasks              Task[]
+  maintenanceRecords MaintenanceRecord[]
+  relatedNotes       Note[]              @relation("SuiteNotes")
+
+  @@index([status])
+  @@index([floor])
+  @@index([status, floor])
+}
+
+model Task {
+  id       String       @id @default(uuid())
+  type     TaskType
+  priority TaskPriority @default(NORMAL)
+  status   TaskStatus   @default(PENDING)
+
+  title       String
+  description String?
+
+  // Assignment
+  assignedToId String?
+  assignedTo   Employee? @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  assignedById String?
+  assignedBy   Employee? @relation("CreatedTasks", fields: [assignedById], references: [id])
+
+  // Suite relationship
+  suiteId String?
+  suite   Suite?  @relation(fields: [suiteId], references: [id])
+
+  // Scheduling
+  scheduledStart    DateTime?
+  scheduledEnd      DateTime?
+  estimatedDuration Int? // minutes
+
+  // Actual timing
+  actualStart    DateTime?
+  actualEnd      DateTime?
+  actualDuration Int? // minutes, computed on completion
+
+  // Completion
+  completionNotes   String?
+  verifiedById      String?
+  verifiedBy        Employee? @relation("VerifiedTasks", fields: [verifiedById], references: [id])
+  verificationNotes String?
+
+  // Task-specific data stored as JSON
+  customFields Json?
+
+  // Recurrence
+  recurring         Boolean              @default(false)
+  recurrencePattern Json?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  // Attachments & subtasks
+  attachedPhotos String[]
+  parentTaskId   String?
+  parentTask     Task?    @relation("Subtasks", fields: [parentTaskId], references: [id])
+  subtasks       Task[]   @relation("Subtasks")
+
+  // Notes relation
+  relatedNotes Note[] @relation("TaskNotes")
+
+  @@index([suiteId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([type])
+  @@index([status, priority, scheduledStart])
+}
+
+model Employee {
+  id             String   @id @default(uuid())
+  employeeNumber String   @unique
+  firstName      String
+  lastName       String
+  email          String   @unique
+  phone          String?
+
+  role       EmployeeRole
+  department Department
+  status     EmployeeStatus @default(ACTIVE)
+
+  // Authentication
+  username     String @unique
+  passwordHash String
+  permissions  String[]
+
+  // Shift info stored as JSON
+  currentShift Json?
+
+  // Current status
+  isOnDuty        Boolean   @default(false)
+  lastClockIn     DateTime?
+  lastClockOut    DateTime?
+  currentLocation String?
+
+  // Performance
+  tasksCompleted      Int      @default(0)
+  averageTaskDuration Int?
+  performanceRating   Decimal? @db.Decimal(2, 1)
+
+  preferredContactMethod ContactMethod @default(IN_APP)
+
+  // Emergency contact stored as JSON
+  emergencyContact Json?
+
+  hireDate   DateTime
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastActive DateTime?
+
+  // Relations
+  assignedTasks Task[] @relation("AssignedTasks")
+  createdTasks  Task[] @relation("CreatedTasks")
+  verifiedTasks Task[] @relation("VerifiedTasks")
+
+  createdNotes         Note[]              @relation("NoteAuthor")
+  followUpNotes        Note[]              @relation("NoteFollowUp")
+  relatedNotes         Note[]              @relation("EmployeeNotes")
+  notifications        Notification[]
+  maintenanceRecords   MaintenanceRecord[]
+  noteComments         NoteComment[]
+  noteReadReceipts     NoteReadReceipt[]
+
+  @@index([status])
+  @@index([role])
+}
+
+model Note {
+  id       String       @id @default(uuid())
+  type     NoteType     @default(GENERAL)
+  priority NotePriority @default(NORMAL)
+
+  title   String?
+  content String
+
+  createdById String
+  createdBy   Employee @relation("NoteAuthor", fields: [createdById], references: [id])
+
+  // Relationships
+  relatedSuiteId    String?
+  relatedSuite      Suite?    @relation("SuiteNotes", fields: [relatedSuiteId], references: [id])
+  relatedTaskId     String?
+  relatedTask       Task?     @relation("TaskNotes", fields: [relatedTaskId], references: [id])
+  relatedEmployeeId String?
+  relatedEmployee   Employee? @relation("EmployeeNotes", fields: [relatedEmployeeId], references: [id])
+
+  visibility NoteVisibility @default(ALL_STAFF)
+  pinned     Boolean        @default(false)
+  archived   Boolean        @default(false)
+
+  tags String[]
+
+  // Follow-up
+  requiresFollowUp     Boolean   @default(false)
+  followUpDate         DateTime?
+  followUpAssignedToId String?
+  followUpAssignedTo   Employee? @relation("NoteFollowUp", fields: [followUpAssignedToId], references: [id])
+  followUpCompleted    Boolean   @default(false)
+
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Sub-relations
+  attachments  NoteAttachment[]
+  comments     NoteComment[]
+  readReceipts NoteReadReceipt[]
+
+  @@index([createdById])
+  @@index([relatedSuiteId])
+  @@index([relatedTaskId])
+  @@index([type])
+  @@index([visibility, archived, createdAt])
+}
+
+model NoteAttachment {
+  id         String   @id @default(uuid())
+  noteId     String
+  note       Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  fileUrl    String
+  fileName   String
+  fileType   String
+  uploadedAt DateTime @default(now())
+}
+
+model NoteComment {
+  id          String   @id @default(uuid())
+  noteId      String
+  note        Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  commentById String
+  commentBy   Employee @relation(fields: [commentById], references: [id])
+  text        String
+  createdAt   DateTime @default(now())
+}
+
+model NoteReadReceipt {
+  id         String   @id @default(uuid())
+  noteId     String
+  note       Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  readAt     DateTime @default(now())
+
+  @@unique([noteId, employeeId])
+}
+
+model MaintenanceRecord {
+  id      String @id @default(uuid())
+  suiteId String
+  suite   Suite  @relation(fields: [suiteId], references: [id])
+  taskId  String?
+
+  maintenanceType String
+  description     String
+
+  performedById String
+  performedBy   Employee @relation(fields: [performedById], references: [id])
+  performedAt   DateTime
+
+  // Parts stored as JSON array
+  partsUsed   Json?
+  totalCost   Decimal? @db.Decimal(10, 2)
+  warrantyInfo String?
+  nextScheduledService DateTime?
+
+  beforePhotos String[]
+  afterPhotos  String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  recipientId String
+  recipient   Employee         @relation(fields: [recipientId], references: [id])
+  type        NotificationType
+  title       String
+  message     String
+  priority    NotePriority     @default(NORMAL)
+
+  read   Boolean   @default(false)
+  readAt DateTime?
+
+  actionRequired Boolean @default(false)
+  actionUrl      String?
+
+  relatedEntityType String?
+  relatedEntityId   String?
+
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([recipientId])
+  @@index([recipientId, read, createdAt])
+}
