@@ -1,18 +1,19 @@
 import { SuitesService } from './suites.service';
-import { CreateSuiteDto, UpdateSuiteDto, FilterSuitesDto } from './dto';
+import { CreateSuiteDto, UpdateSuiteDto } from './dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 export declare class SuitesController {
     private readonly suitesService;
     constructor(suitesService: SuitesService);
     create(createSuiteDto: CreateSuiteDto): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
-        currentGuest: import("@prisma/client/runtime/client").JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        type: import(".prisma/client").$Enums.SuiteType;
+        currentGuest: import("@prisma/client/runtime/library").JsonValue | null;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -20,24 +21,24 @@ export declare class SuitesController {
         nextScheduledMaintenance: Date | null;
         notes: string | null;
     }>;
-    findAll(filters: FilterSuitesDto): Promise<{
+    findAll(paginationDto: PaginationDto): Promise<{
         data: ({
             tasks: {
                 id: string;
-                status: import("@prisma/client").$Enums.TaskStatus;
-                type: import("@prisma/client").$Enums.TaskType;
-                priority: import("@prisma/client").$Enums.TaskPriority;
+                status: import(".prisma/client").$Enums.TaskStatus;
+                type: import(".prisma/client").$Enums.TaskType;
+                priority: import(".prisma/client").$Enums.TaskPriority;
             }[];
         } & {
             id: string;
-            status: import("@prisma/client").$Enums.SuiteStatus;
+            status: import(".prisma/client").$Enums.SuiteStatus;
             createdAt: Date;
             updatedAt: Date;
             suiteNumber: string;
             floor: number;
-            type: import("@prisma/client").$Enums.SuiteType;
-            currentGuest: import("@prisma/client/runtime/client").JsonValue | null;
-            bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+            type: import(".prisma/client").$Enums.SuiteType;
+            currentGuest: import("@prisma/client/runtime/library").JsonValue | null;
+            bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
             amenities: string[];
             squareFeet: number | null;
             lastCleaned: Date | null;
@@ -68,11 +69,11 @@ export declare class SuitesController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.NoteType;
-            priority: import("@prisma/client").$Enums.NotePriority;
+            type: import(".prisma/client").$Enums.NoteType;
+            priority: import(".prisma/client").$Enums.NotePriority;
             title: string | null;
             content: string;
-            visibility: import("@prisma/client").$Enums.NoteVisibility;
+            visibility: import(".prisma/client").$Enums.NoteVisibility;
             pinned: boolean;
             archived: boolean;
             tags: string[];
@@ -96,8 +97,8 @@ export declare class SuitesController {
             taskId: string | null;
             maintenanceType: string;
             performedById: string;
-            partsUsed: import("@prisma/client/runtime/client").JsonValue | null;
-            totalCost: import("@prisma/client-runtime-utils").Decimal | null;
+            partsUsed: import("@prisma/client/runtime/library").JsonValue | null;
+            totalCost: import("@prisma/client/runtime/library").Decimal | null;
             warrantyInfo: string | null;
             nextScheduledService: Date | null;
             beforePhotos: string[];
@@ -105,11 +106,11 @@ export declare class SuitesController {
         }[];
         tasks: {
             id: string;
-            status: import("@prisma/client").$Enums.TaskStatus;
+            status: import(".prisma/client").$Enums.TaskStatus;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.TaskType;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            type: import(".prisma/client").$Enums.TaskType;
+            priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
             description: string | null;
             scheduledStart: Date | null;
@@ -120,9 +121,9 @@ export declare class SuitesController {
             actualDuration: number | null;
             completionNotes: string | null;
             verificationNotes: string | null;
-            customFields: import("@prisma/client/runtime/client").JsonValue | null;
+            customFields: import("@prisma/client/runtime/library").JsonValue | null;
             recurring: boolean;
-            recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+            recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
             completedAt: Date | null;
             attachedPhotos: string[];
             assignedToId: string | null;
@@ -133,14 +134,14 @@ export declare class SuitesController {
         }[];
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
-        currentGuest: import("@prisma/client/runtime/client").JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        type: import(".prisma/client").$Enums.SuiteType;
+        currentGuest: import("@prisma/client/runtime/library").JsonValue | null;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -150,14 +151,14 @@ export declare class SuitesController {
     }>;
     findByNumber(suiteNumber: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
-        currentGuest: import("@prisma/client/runtime/client").JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        type: import(".prisma/client").$Enums.SuiteType;
+        currentGuest: import("@prisma/client/runtime/library").JsonValue | null;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -167,14 +168,14 @@ export declare class SuitesController {
     }>;
     update(id: string, updateSuiteDto: UpdateSuiteDto): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
-        currentGuest: import("@prisma/client/runtime/client").JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        type: import(".prisma/client").$Enums.SuiteType;
+        currentGuest: import("@prisma/client/runtime/library").JsonValue | null;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -184,14 +185,14 @@ export declare class SuitesController {
     }>;
     updateStatus(id: string, status: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
-        currentGuest: import("@prisma/client/runtime/client").JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        type: import(".prisma/client").$Enums.SuiteType;
+        currentGuest: import("@prisma/client/runtime/library").JsonValue | null;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -201,14 +202,14 @@ export declare class SuitesController {
     }>;
     remove(id: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
-        currentGuest: import("@prisma/client/runtime/client").JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        type: import(".prisma/client").$Enums.SuiteType;
+        currentGuest: import("@prisma/client/runtime/library").JsonValue | null;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;

@@ -27,6 +27,7 @@ let TasksController = class TasksController {
         return this.tasksService.create(createTaskDto);
     }
     findAll(filters) {
+        console.log('GET /tasks endpoint hit');
         return this.tasksService.findAll(filters);
     }
     getStats() {

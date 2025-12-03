@@ -16,11 +16,11 @@ export declare class TasksController {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -31,9 +31,9 @@ export declare class TasksController {
         actualDuration: number | null;
         completionNotes: string | null;
         verificationNotes: string | null;
-        customFields: import("@prisma/client/runtime/client").JsonValue | null;
+        customFields: import("@prisma/client/runtime/library").JsonValue | null;
         recurring: boolean;
-        recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+        recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
         completedAt: Date | null;
         attachedPhotos: string[];
         assignedToId: string | null;
@@ -60,11 +60,11 @@ export declare class TasksController {
             } | null;
         } & {
             id: string;
-            status: import("@prisma/client").$Enums.TaskStatus;
+            status: import(".prisma/client").$Enums.TaskStatus;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.TaskType;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            type: import(".prisma/client").$Enums.TaskType;
+            priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
             description: string | null;
             scheduledStart: Date | null;
@@ -75,9 +75,9 @@ export declare class TasksController {
             actualDuration: number | null;
             completionNotes: string | null;
             verificationNotes: string | null;
-            customFields: import("@prisma/client/runtime/client").JsonValue | null;
+            customFields: import("@prisma/client/runtime/library").JsonValue | null;
             recurring: boolean;
-            recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+            recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
             completedAt: Date | null;
             attachedPhotos: string[];
             assignedToId: string | null;
@@ -110,11 +110,11 @@ export declare class TasksController {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -125,9 +125,9 @@ export declare class TasksController {
         actualDuration: number | null;
         completionNotes: string | null;
         verificationNotes: string | null;
-        customFields: import("@prisma/client/runtime/client").JsonValue | null;
+        customFields: import("@prisma/client/runtime/library").JsonValue | null;
         recurring: boolean;
-        recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+        recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
         completedAt: Date | null;
         attachedPhotos: string[];
         assignedToId: string | null;
@@ -143,11 +143,11 @@ export declare class TasksController {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -158,9 +158,9 @@ export declare class TasksController {
         actualDuration: number | null;
         completionNotes: string | null;
         verificationNotes: string | null;
-        customFields: import("@prisma/client/runtime/client").JsonValue | null;
+        customFields: import("@prisma/client/runtime/library").JsonValue | null;
         recurring: boolean;
-        recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+        recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
         completedAt: Date | null;
         attachedPhotos: string[];
         assignedToId: string | null;
@@ -174,11 +174,11 @@ export declare class TasksController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.NoteType;
-            priority: import("@prisma/client").$Enums.NotePriority;
+            type: import(".prisma/client").$Enums.NoteType;
+            priority: import(".prisma/client").$Enums.NotePriority;
             title: string | null;
             content: string;
-            visibility: import("@prisma/client").$Enums.NoteVisibility;
+            visibility: import(".prisma/client").$Enums.NoteVisibility;
             pinned: boolean;
             archived: boolean;
             tags: string[];
@@ -194,14 +194,14 @@ export declare class TasksController {
         }[];
         suite: {
             id: string;
-            status: import("@prisma/client").$Enums.SuiteStatus;
+            status: import(".prisma/client").$Enums.SuiteStatus;
             createdAt: Date;
             updatedAt: Date;
             suiteNumber: string;
             floor: number;
-            type: import("@prisma/client").$Enums.SuiteType;
-            currentGuest: import("@prisma/client/runtime/client").JsonValue | null;
-            bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+            type: import(".prisma/client").$Enums.SuiteType;
+            currentGuest: import("@prisma/client/runtime/library").JsonValue | null;
+            bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
             amenities: string[];
             squareFeet: number | null;
             lastCleaned: Date | null;
@@ -214,7 +214,7 @@ export declare class TasksController {
             email: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.EmployeeRole;
+            role: import(".prisma/client").$Enums.EmployeeRole;
         } | null;
         assignedBy: {
             id: string;
@@ -228,11 +228,11 @@ export declare class TasksController {
         } | null;
         subtasks: {
             id: string;
-            status: import("@prisma/client").$Enums.TaskStatus;
+            status: import(".prisma/client").$Enums.TaskStatus;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.TaskType;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            type: import(".prisma/client").$Enums.TaskType;
+            priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
             description: string | null;
             scheduledStart: Date | null;
@@ -243,9 +243,9 @@ export declare class TasksController {
             actualDuration: number | null;
             completionNotes: string | null;
             verificationNotes: string | null;
-            customFields: import("@prisma/client/runtime/client").JsonValue | null;
+            customFields: import("@prisma/client/runtime/library").JsonValue | null;
             recurring: boolean;
-            recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+            recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
             completedAt: Date | null;
             attachedPhotos: string[];
             assignedToId: string | null;
@@ -256,11 +256,11 @@ export declare class TasksController {
         }[];
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -271,9 +271,9 @@ export declare class TasksController {
         actualDuration: number | null;
         completionNotes: string | null;
         verificationNotes: string | null;
-        customFields: import("@prisma/client/runtime/client").JsonValue | null;
+        customFields: import("@prisma/client/runtime/library").JsonValue | null;
         recurring: boolean;
-        recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+        recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
         completedAt: Date | null;
         attachedPhotos: string[];
         assignedToId: string | null;
@@ -294,11 +294,11 @@ export declare class TasksController {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -309,9 +309,9 @@ export declare class TasksController {
         actualDuration: number | null;
         completionNotes: string | null;
         verificationNotes: string | null;
-        customFields: import("@prisma/client/runtime/client").JsonValue | null;
+        customFields: import("@prisma/client/runtime/library").JsonValue | null;
         recurring: boolean;
-        recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+        recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
         completedAt: Date | null;
         attachedPhotos: string[];
         assignedToId: string | null;
@@ -323,14 +323,14 @@ export declare class TasksController {
     updateStatus(id: string, status: TaskStatus): Promise<{
         suite: {
             id: string;
-            status: import("@prisma/client").$Enums.SuiteStatus;
+            status: import(".prisma/client").$Enums.SuiteStatus;
             createdAt: Date;
             updatedAt: Date;
             suiteNumber: string;
             floor: number;
-            type: import("@prisma/client").$Enums.SuiteType;
-            currentGuest: import("@prisma/client/runtime/client").JsonValue | null;
-            bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+            type: import(".prisma/client").$Enums.SuiteType;
+            currentGuest: import("@prisma/client/runtime/library").JsonValue | null;
+            bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
             amenities: string[];
             squareFeet: number | null;
             lastCleaned: Date | null;
@@ -345,11 +345,11 @@ export declare class TasksController {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -360,9 +360,9 @@ export declare class TasksController {
         actualDuration: number | null;
         completionNotes: string | null;
         verificationNotes: string | null;
-        customFields: import("@prisma/client/runtime/client").JsonValue | null;
+        customFields: import("@prisma/client/runtime/library").JsonValue | null;
         recurring: boolean;
-        recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+        recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
         completedAt: Date | null;
         attachedPhotos: string[];
         assignedToId: string | null;
@@ -383,11 +383,11 @@ export declare class TasksController {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -398,9 +398,9 @@ export declare class TasksController {
         actualDuration: number | null;
         completionNotes: string | null;
         verificationNotes: string | null;
-        customFields: import("@prisma/client/runtime/client").JsonValue | null;
+        customFields: import("@prisma/client/runtime/library").JsonValue | null;
         recurring: boolean;
-        recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+        recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
         completedAt: Date | null;
         attachedPhotos: string[];
         assignedToId: string | null;
@@ -411,11 +411,11 @@ export declare class TasksController {
     }>;
     remove(id: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -426,9 +426,9 @@ export declare class TasksController {
         actualDuration: number | null;
         completionNotes: string | null;
         verificationNotes: string | null;
-        customFields: import("@prisma/client/runtime/client").JsonValue | null;
+        customFields: import("@prisma/client/runtime/library").JsonValue | null;
         recurring: boolean;
-        recurrencePattern: import("@prisma/client/runtime/client").JsonValue | null;
+        recurrencePattern: import("@prisma/client/runtime/library").JsonValue | null;
         completedAt: Date | null;
         attachedPhotos: string[];
         assignedToId: string | null;

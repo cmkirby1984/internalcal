@@ -7,8 +7,8 @@ export declare class NotificationsService {
     create(createNotificationDto: CreateNotificationDto): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.NotificationType;
-        priority: import("@prisma/client").$Enums.NotePriority;
+        type: import(".prisma/client").$Enums.NotificationType;
+        priority: import(".prisma/client").$Enums.NotePriority;
         title: string;
         expiresAt: Date | null;
         message: string;
@@ -24,8 +24,8 @@ export declare class NotificationsService {
     findAllForUser(userId: string, includeRead?: boolean): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.NotificationType;
-        priority: import("@prisma/client").$Enums.NotePriority;
+        type: import(".prisma/client").$Enums.NotificationType;
+        priority: import(".prisma/client").$Enums.NotePriority;
         title: string;
         expiresAt: Date | null;
         message: string;
@@ -41,8 +41,8 @@ export declare class NotificationsService {
     markAsRead(id: string): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.NotificationType;
-        priority: import("@prisma/client").$Enums.NotePriority;
+        type: import(".prisma/client").$Enums.NotificationType;
+        priority: import(".prisma/client").$Enums.NotePriority;
         title: string;
         expiresAt: Date | null;
         message: string;
@@ -58,8 +58,8 @@ export declare class NotificationsService {
     remove(id: string): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.NotificationType;
-        priority: import("@prisma/client").$Enums.NotePriority;
+        type: import(".prisma/client").$Enums.NotificationType;
+        priority: import(".prisma/client").$Enums.NotePriority;
         title: string;
         expiresAt: Date | null;
         message: string;
@@ -75,8 +75,8 @@ export declare class NotificationsService {
     notifyTaskAssigned(taskId: string, assignedToId: string, taskTitle: string): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.NotificationType;
-        priority: import("@prisma/client").$Enums.NotePriority;
+        type: import(".prisma/client").$Enums.NotificationType;
+        priority: import(".prisma/client").$Enums.NotePriority;
         title: string;
         expiresAt: Date | null;
         message: string;

@@ -57,19 +57,22 @@ export const useAuthStore = create<AuthStore>()(
 
         logout: async () => {
           try {
-            await authApi.logout();
-          } catch {
-            // Logout locally even if API fails
+            // Attempt API logout but don't block on it
+            await authApi.logout().catch(() => {});
           } finally {
-            tokenStorage.clearAll();
+            // Force clear all local storage to ensure no stale state remains
+            if (typeof window !== 'undefined') {
+              localStorage.clear();
+              tokenStorage.clearAll();
+            }
 
             set(() => ({
               ...initialState,
             }));
 
-            // Clear all other stores (they will listen for this event)
+            // Force reload to clear in-memory state completely
             if (typeof window !== 'undefined') {
-              window.dispatchEvent(new CustomEvent('auth:logout'));
+              window.location.href = '/login';
             }
           }
         },

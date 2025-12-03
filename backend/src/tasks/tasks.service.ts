@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma';
@@ -19,6 +21,8 @@ import { TaskStatusService } from '../domain/status';
 
 @Injectable()
 export class TasksService {
+  private readonly logger = new Logger(TasksService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
@@ -94,74 +98,81 @@ export class TasksService {
   }
 
   async findAll(filters: FilterTasksDto) {
-    const {
-      page = 1,
-      limit = 20,
-      status,
-      type,
-      priority,
-      assignedToId,
-      suiteId,
-      scheduledAfter,
-      scheduledBefore,
-      search,
-      sortBy,
-      sortOrder,
-    } = filters;
-    const skip = (page - 1) * limit;
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        status,
+        type,
+        priority,
+        assignedToId,
+        suiteId,
+        scheduledAfter,
+        scheduledBefore,
+        search,
+        sortBy,
+        sortOrder,
+      } = filters;
+      const skip = (page - 1) * limit;
 
-    const where: Prisma.TaskWhereInput = {};
+      const where: Prisma.TaskWhereInput = {};
 
-    if (status) where.status = status;
-    if (type) where.type = type;
-    if (priority) where.priority = priority;
-    if (assignedToId) where.assignedToId = assignedToId;
-    if (suiteId) where.suiteId = suiteId;
+      if (status) where.status = status;
+      if (type) where.type = type;
+      if (priority) where.priority = priority;
+      if (assignedToId) where.assignedToId = assignedToId;
+      if (suiteId) where.suiteId = suiteId;
 
-    if (scheduledAfter || scheduledBefore) {
-      where.scheduledStart = {};
-      if (scheduledAfter) where.scheduledStart.gte = new Date(scheduledAfter);
-      if (scheduledBefore) where.scheduledStart.lte = new Date(scheduledBefore);
-    }
+      if (scheduledAfter || scheduledBefore) {
+        where.scheduledStart = {};
+        if (scheduledAfter) where.scheduledStart.gte = new Date(scheduledAfter);
+        if (scheduledBefore) where.scheduledStart.lte = new Date(scheduledBefore);
+      }
 
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-      ];
-    }
+      if (search) {
+        where.OR = [
+          { title: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ];
+      }
 
-    const orderBy: Prisma.TaskOrderByWithRelationInput = {};
-    if (sortBy) {
-      orderBy[sortBy] = sortOrder || 'desc';
-    } else {
-      orderBy.createdAt = 'desc';
-    }
+      const orderBy: Prisma.TaskOrderByWithRelationInput = {};
+      if (sortBy) {
+        orderBy[sortBy] = sortOrder || 'desc';
+      } else {
+        orderBy.createdAt = 'desc';
+      }
 
-    const [data, total] = await Promise.all([
-      this.prisma.task.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy,
-        include: {
-          suite: { select: { id: true, suiteNumber: true } },
-          assignedTo: { select: { id: true, firstName: true, lastName: true } },
-          assignedBy: { select: { id: true, firstName: true, lastName: true } },
+      const [data, total] = await Promise.all([
+        this.prisma.task.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy,
+          include: {
+            suite: { select: { id: true, suiteNumber: true } },
+            assignedTo: { select: { id: true, firstName: true, lastName: true } },
+            assignedBy: { select: { id: true, firstName: true, lastName: true } },
+          },
+        }),
+        this.prisma.task.count({ where }),
+      ]);
+
+      this.logger.log(`Found ${total} tasks with filters: ${JSON.stringify(filters)}`);
+
+      return {
+        data,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
         },
-      }),
-      this.prisma.task.count({ where }),
-    ]);
-
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch tasks: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to load tasks.');
+    }
   }
 
   async findOne(id: string) {

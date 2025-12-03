@@ -5,8 +5,8 @@ export declare class NotificationsController {
     findAll(userId: string, includeRead?: string): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.NotificationType;
-        priority: import("@prisma/client").$Enums.NotePriority;
+        type: import(".prisma/client").$Enums.NotificationType;
+        priority: import(".prisma/client").$Enums.NotePriority;
         title: string;
         expiresAt: Date | null;
         message: string;
@@ -22,8 +22,8 @@ export declare class NotificationsController {
     markAsRead(id: string): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.NotificationType;
-        priority: import("@prisma/client").$Enums.NotePriority;
+        type: import(".prisma/client").$Enums.NotificationType;
+        priority: import(".prisma/client").$Enums.NotePriority;
         title: string;
         expiresAt: Date | null;
         message: string;
@@ -35,12 +35,12 @@ export declare class NotificationsController {
         relatedEntityId: string | null;
         recipientId: string;
     }>;
-    markAllAsRead(userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
+    markAllAsRead(userId: string): Promise<import(".prisma/client").Prisma.BatchPayload>;
     remove(id: string): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.NotificationType;
-        priority: import("@prisma/client").$Enums.NotePriority;
+        type: import(".prisma/client").$Enums.NotificationType;
+        priority: import(".prisma/client").$Enums.NotePriority;
         title: string;
         expiresAt: Date | null;
         message: string;

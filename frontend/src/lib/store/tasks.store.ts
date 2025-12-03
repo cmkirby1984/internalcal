@@ -55,7 +55,16 @@ export const useTasksStore = create<TasksStore>()(
         });
 
         try {
-          const tasks = await tasksApi.getAll(options as Parameters<typeof tasksApi.getAll>[0]);
+          // The API might return { data: Task[], meta: ... } or just Task[]
+          const response = await tasksApi.getAll(options as Parameters<typeof tasksApi.getAll>[0]);
+          
+          // Handle paginated response structure
+          const tasks = Array.isArray(response) ? response : (response as any).data;
+
+          if (!Array.isArray(tasks)) {
+            throw new Error('Invalid API response format: expected array of tasks');
+          }
+
           get().normalizeTasks(tasks);
           get().updateTaskGroupings();
 
@@ -289,10 +298,21 @@ export const useTasksStore = create<TasksStore>()(
       // LOCAL STATE UPDATES
       // ───────────────────────────────────────────────────────────────────────
 
-      normalizeTasks: (tasks: Task[]) => {
+      normalizeTasks: (tasks: any[]) => {
         set((state) => {
           tasks.forEach((task) => {
-            state.items[task.id] = task;
+            // Flatten nested objects for UI consumption
+            const uiTask = {
+              ...task,
+              suiteId: task.suite?.id || task.suiteId,
+              suiteNumber: task.suite?.suiteNumber,
+              assignedTo: task.assignedTo 
+                ? `${task.assignedTo.firstName} ${task.assignedTo.lastName}`
+                : null,
+              assignedToId: task.assignedTo?.id || task.assignedToId,
+            };
+
+            state.items[task.id] = uiTask;
             if (!state.allIds.includes(task.id)) {
               state.allIds.push(task.id);
             }

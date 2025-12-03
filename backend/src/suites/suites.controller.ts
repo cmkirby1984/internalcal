@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { SuitesService } from './suites.service';
 import { CreateSuiteDto, UpdateSuiteDto, FilterSuitesDto } from './dto';
+import { PaginationDto } from '../common/dto/pagination.dto'; // Added import
 
 @ApiTags('Suites')
 @Controller('suites')
@@ -34,8 +35,9 @@ export class SuitesController {
   @Get()
   @ApiOperation({ summary: 'Get all suites with filtering and pagination' })
   @ApiResponse({ status: 200, description: 'List of suites' })
-  findAll(@Query() filters: FilterSuitesDto) {
-    return this.suitesService.findAll(filters);
+  findAll(@Query() paginationDto: PaginationDto) {
+    console.log('GET /suites endpoint hit');
+    return this.suitesService.findAll(paginationDto);
   }
 
   @Get('stats')

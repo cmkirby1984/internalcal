@@ -35,6 +35,7 @@ export class TasksController {
   @ApiOperation({ summary: 'Get all tasks with filtering and pagination' })
   @ApiResponse({ status: 200, description: 'List of tasks' })
   findAll(@Query() filters: FilterTasksDto) {
+    console.log('GET /tasks endpoint hit');
     return this.tasksService.findAll(filters);
   }
 

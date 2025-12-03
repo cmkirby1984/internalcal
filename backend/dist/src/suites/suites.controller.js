@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const suites_service_1 = require("./suites.service");
 const dto_1 = require("./dto");
+const pagination_dto_1 = require("../common/dto/pagination.dto");
 let SuitesController = class SuitesController {
     suitesService;
     constructor(suitesService) {
@@ -25,8 +26,9 @@ let SuitesController = class SuitesController {
     create(createSuiteDto) {
         return this.suitesService.create(createSuiteDto);
     }
-    findAll(filters) {
-        return this.suitesService.findAll(filters);
+    findAll(paginationDto) {
+        console.log('GET /suites endpoint hit');
+        return this.suitesService.findAll(paginationDto);
     }
     getStats() {
         return this.suitesService.getStats();
@@ -64,7 +66,7 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of suites' }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [dto_1.FilterSuitesDto]),
+    __metadata("design:paramtypes", [pagination_dto_1.PaginationDto]),
     __metadata("design:returntype", void 0)
 ], SuitesController.prototype, "findAll", null);
 __decorate([

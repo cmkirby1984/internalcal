@@ -1,170 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
 import { TaskList, TaskKanban, TaskFilters } from '@/components/tasks';
 import { useTasksStore, useUIStore } from '@/lib/store';
 import { UITask, TaskStatus, TaskPriority, TaskType } from '@/lib/types';
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   MOCK DATA (Replace with real API calls)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-const mockTasks: UITask[] = [
-  {
-    id: '1',
-    type: TaskType.CLEANING,
-    priority: TaskPriority.NORMAL,
-    status: TaskStatus.PENDING,
-    title: 'Clean Suite 103',
-    description: 'Standard checkout cleaning with fresh linens',
-    suiteId: '3',
-    assignedTo: null,
-    createdBy: 'admin',
-    scheduledStart: new Date(Date.now() + 1000 * 60 * 30).toISOString(),
-    scheduledEnd: new Date(Date.now() + 1000 * 60 * 90).toISOString(),
-    estimatedDuration: 45,
-    actualDuration: null,
-    notes: [],
-    checklist: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    type: TaskType.MAINTENANCE,
-    priority: TaskPriority.HIGH,
-    status: TaskStatus.IN_PROGRESS,
-    title: 'Fix AC Unit in Suite 201',
-    description: 'Guest reported AC not cooling properly',
-    suiteId: '4',
-    assignedTo: 'John Smith',
-    createdBy: 'admin',
-    scheduledStart: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-    scheduledEnd: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
-    estimatedDuration: 120,
-    actualDuration: null,
-    notes: [],
-    checklist: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    type: TaskType.CUSTOM,
-    priority: TaskPriority.URGENT,
-    status: TaskStatus.ASSIGNED,
-    title: 'Extra Towels for Suite 302',
-    description: 'Guest requested 4 extra bath towels',
-    suiteId: '8',
-    assignedTo: 'Maria Garcia',
-    createdBy: 'admin',
-    scheduledStart: new Date().toISOString(),
-    scheduledEnd: new Date(Date.now() + 1000 * 60 * 15).toISOString(),
-    estimatedDuration: 10,
-    actualDuration: null,
-    notes: [],
-    checklist: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    type: TaskType.INSPECTION,
-    priority: TaskPriority.NORMAL,
-    status: TaskStatus.COMPLETED,
-    title: 'Room Inspection - Suite 101',
-    description: 'Post-cleaning quality inspection',
-    suiteId: '1',
-    assignedTo: 'Sarah Johnson',
-    createdBy: 'admin',
-    scheduledStart: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-    scheduledEnd: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    estimatedDuration: 15,
-    actualDuration: 12,
-    notes: [],
-    checklist: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-  },
-  {
-    id: '5',
-    type: TaskType.CUSTOM,
-    priority: TaskPriority.LOW,
-    status: TaskStatus.PENDING,
-    title: 'Restock Mini Bar - Suite 201',
-    description: 'Standard mini bar restocking',
-    suiteId: '4',
-    assignedTo: null,
-    createdBy: 'admin',
-    scheduledStart: new Date(Date.now() + 1000 * 60 * 60 * 4).toISOString(),
-    scheduledEnd: new Date(Date.now() + 1000 * 60 * 60 * 5).toISOString(),
-    estimatedDuration: 15,
-    actualDuration: null,
-    notes: [],
-    checklist: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '6',
-    type: TaskType.MAINTENANCE,
-    priority: TaskPriority.EMERGENCY,
-    status: TaskStatus.IN_PROGRESS,
-    title: 'Water Leak - Suite 202',
-    description: 'Bathroom pipe leak, needs immediate attention',
-    suiteId: '5',
-    assignedTo: 'Mike Wilson',
-    createdBy: 'admin',
-    scheduledStart: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    scheduledEnd: new Date(Date.now() + 1000 * 60 * 30).toISOString(),
-    estimatedDuration: 60,
-    actualDuration: null,
-    notes: [],
-    checklist: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '7',
-    type: TaskType.LINEN_CHANGE,
-    priority: TaskPriority.NORMAL,
-    status: TaskStatus.ASSIGNED,
-    title: 'Collect Laundry - Floor 3',
-    description: 'Collect all dirty linens from floor 3 suites',
-    suiteId: null,
-    assignedTo: 'Emily Davis',
-    createdBy: 'admin',
-    scheduledStart: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
-    scheduledEnd: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(),
-    estimatedDuration: 45,
-    actualDuration: null,
-    notes: [],
-    checklist: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '8',
-    type: TaskType.CLEANING,
-    priority: TaskPriority.HIGH,
-    status: TaskStatus.PENDING,
-    title: 'Deep Clean Suite 301',
-    description: 'Monthly deep cleaning for penthouse suite',
-    suiteId: '7',
-    assignedTo: null,
-    createdBy: 'admin',
-    scheduledStart: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-    scheduledEnd: new Date(Date.now() + 1000 * 60 * 60 * 28).toISOString(),
-    estimatedDuration: 180,
-    actualDuration: null,
-    notes: [],
-    checklist: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 /* ─────────────────────────────────────────────────────────────────────────────
    TASKS PAGE
@@ -176,6 +17,12 @@ export default function TasksPage() {
   const router = useRouter();
   const openModal = useUIStore((state) => state.openModal);
   
+  // Store state
+  const tasksMap = useTasksStore((state) => state.items);
+  const isLoading = useTasksStore((state) => state.isLoading);
+  const fetchAllTasks = useTasksStore((state) => state.fetchAllTasks);
+  const updateTaskStatus = useTasksStore((state) => state.updateTaskStatus);
+
   // Local state
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [showFilters, setShowFilters] = useState(false);
@@ -187,9 +34,13 @@ export default function TasksPage() {
     overdue?: boolean;
   }>({});
 
-  // Use mock data for now
-  const tasks = mockTasks;
-  const isLoading = false;
+  // Fetch data on mount
+  useEffect(() => {
+    fetchAllTasks();
+  }, [fetchAllTasks]);
+
+  // Convert map to array
+  const tasks = useMemo(() => Object.values(tasksMap), [tasksMap]);
 
   // Filter tasks
   const filteredTasks = useMemo(() => {
@@ -224,12 +75,13 @@ export default function TasksPage() {
   };
 
   const handleTaskClick = (task: UITask) => {
-    router.push(`/tasks/${task.id}`);
+    // Navigate to task detail
+    // router.push(`/tasks/${task.id}`);
+    console.log('Clicked task:', task.id);
   };
 
-  const handleStatusChange = (taskId: string, status: TaskStatus) => {
-    // TODO: Implement status change
-    console.log('Status change:', taskId, status);
+  const handleStatusChange = async (taskId: string, status: TaskStatus) => {
+    await updateTaskStatus(taskId, status);
   };
 
   const handleCreateTask = () => {
@@ -375,4 +227,3 @@ export default function TasksPage() {
     </div>
   );
 }
-

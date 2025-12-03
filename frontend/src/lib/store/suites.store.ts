@@ -50,7 +50,16 @@ export const useSuitesStore = create<SuitesStore>()(
         });
 
         try {
-          const suites = await suitesApi.getAll();
+          // The API might return { data: Suite[], meta: ... } or just Suite[]
+          const response = await suitesApi.getAll();
+          
+          // Handle paginated response structure
+          const suites = Array.isArray(response) ? response : (response as any).data;
+          
+          if (!Array.isArray(suites)) {
+            throw new Error('Invalid API response format: expected array of suites');
+          }
+
           get().normalizeSuites(suites);
 
           set((state) => {

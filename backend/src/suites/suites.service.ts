@@ -1,15 +1,25 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma';
-import { CreateSuiteDto, UpdateSuiteDto, FilterSuitesDto } from './dto';
-import { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { PaginationDto } from '../common/dto/pagination.dto'; // Corrected import
+import { CreateSuiteDto } from './dto/create-suite.dto';
+import { UpdateSuiteDto } from './dto/update-suite.dto';
+import { SuiteStatus, Prisma } from '@prisma/client'; // Import Prisma for types
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class SuitesService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(SuitesService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async create(createSuiteDto: CreateSuiteDto) {
     try {
@@ -34,57 +44,49 @@ export class SuitesService {
     }
   }
 
-  async findAll(filters: FilterSuitesDto) {
-    const { page = 1, limit = 20, status, type, floor, search, sortBy, sortOrder } = filters;
-    const skip = (page - 1) * limit;
+  async findAll(paginationDto: PaginationDto) {
+    try {
+      const page = paginationDto.page ?? 1;
+      const limit = paginationDto.limit ?? 20; // Default limit
+      const offset = (page - 1) * limit;
 
-    const where: Prisma.SuiteWhereInput = {};
+      const where: Prisma.SuiteWhereInput = {};
 
-    if (status) where.status = status;
-    if (type) where.type = type;
-    if (floor) where.floor = floor;
-    if (search) {
-      where.OR = [
-        { suiteNumber: { contains: search, mode: 'insensitive' } },
-        { notes: { contains: search, mode: 'insensitive' } },
-      ];
-    }
+      const orderBy: Prisma.SuiteOrderByWithRelationInput = {};
+      orderBy.suiteNumber = 'asc'; // Default sorting
 
-    const orderBy: Prisma.SuiteOrderByWithRelationInput = {};
-    if (sortBy) {
-      orderBy[sortBy] = sortOrder || 'asc';
-    } else {
-      orderBy.suiteNumber = 'asc';
-    }
-
-    const [data, total] = await Promise.all([
-      this.prisma.suite.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy,
-        include: {
-          tasks: {
-            where: {
-              status: { in: ['PENDING', 'ASSIGNED', 'IN_PROGRESS'] },
+      const [data, total] = await Promise.all([
+        this.prisma.suite.findMany({
+          skip: offset,
+          take: limit,
+          orderBy,
+          include: {
+            tasks: {
+              where: {
+                status: { in: ['PENDING', 'ASSIGNED', 'IN_PROGRESS'] },
+              },
+              select: { id: true, type: true, status: true, priority: true },
             },
-            select: { id: true, type: true, status: true, priority: true },
           },
-        },
-      }),
-      this.prisma.suite.count({ where }),
-    ]);
+        }),
+        this.prisma.suite.count({ where }),
+      ]);
 
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+      return {
+        data,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch suites: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to load suites.');
+    }
   }
+
 
   async findOne(id: string) {
     const suite = await this.prisma.suite.findUnique({

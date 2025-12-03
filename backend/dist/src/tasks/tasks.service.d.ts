@@ -7,6 +7,7 @@ export declare class TasksService {
     private readonly prisma;
     private readonly eventEmitter;
     private readonly taskStatusService;
+    private readonly logger;
     constructor(prisma: PrismaService, eventEmitter: EventEmitter2, taskStatusService: TaskStatusService);
     create(createTaskDto: CreateTaskDto): Promise<{
         suite: {
@@ -20,11 +21,11 @@ export declare class TasksService {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -64,11 +65,11 @@ export declare class TasksService {
             } | null;
         } & {
             id: string;
-            status: import("@prisma/client").$Enums.TaskStatus;
+            status: import(".prisma/client").$Enums.TaskStatus;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.TaskType;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            type: import(".prisma/client").$Enums.TaskType;
+            priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
             description: string | null;
             scheduledStart: Date | null;
@@ -102,11 +103,11 @@ export declare class TasksService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.NoteType;
-            priority: import("@prisma/client").$Enums.NotePriority;
+            type: import(".prisma/client").$Enums.NoteType;
+            priority: import(".prisma/client").$Enums.NotePriority;
             title: string | null;
             content: string;
-            visibility: import("@prisma/client").$Enums.NoteVisibility;
+            visibility: import(".prisma/client").$Enums.NoteVisibility;
             pinned: boolean;
             archived: boolean;
             tags: string[];
@@ -122,14 +123,14 @@ export declare class TasksService {
         }[];
         suite: {
             id: string;
-            status: import("@prisma/client").$Enums.SuiteStatus;
+            status: import(".prisma/client").$Enums.SuiteStatus;
             createdAt: Date;
             updatedAt: Date;
             suiteNumber: string;
             floor: number;
-            type: import("@prisma/client").$Enums.SuiteType;
+            type: import(".prisma/client").$Enums.SuiteType;
             currentGuest: Prisma.JsonValue | null;
-            bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+            bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
             amenities: string[];
             squareFeet: number | null;
             lastCleaned: Date | null;
@@ -142,7 +143,7 @@ export declare class TasksService {
             email: string;
             firstName: string;
             lastName: string;
-            role: import("@prisma/client").$Enums.EmployeeRole;
+            role: import(".prisma/client").$Enums.EmployeeRole;
         } | null;
         assignedBy: {
             id: string;
@@ -156,11 +157,11 @@ export declare class TasksService {
         } | null;
         subtasks: {
             id: string;
-            status: import("@prisma/client").$Enums.TaskStatus;
+            status: import(".prisma/client").$Enums.TaskStatus;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.TaskType;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            type: import(".prisma/client").$Enums.TaskType;
+            priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
             description: string | null;
             scheduledStart: Date | null;
@@ -184,11 +185,11 @@ export declare class TasksService {
         }[];
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -218,11 +219,11 @@ export declare class TasksService {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -251,11 +252,11 @@ export declare class TasksService {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -289,11 +290,11 @@ export declare class TasksService {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -318,14 +319,14 @@ export declare class TasksService {
     updateStatus(id: string, status: TaskStatus, userId?: string): Promise<{
         suite: {
             id: string;
-            status: import("@prisma/client").$Enums.SuiteStatus;
+            status: import(".prisma/client").$Enums.SuiteStatus;
             createdAt: Date;
             updatedAt: Date;
             suiteNumber: string;
             floor: number;
-            type: import("@prisma/client").$Enums.SuiteType;
+            type: import(".prisma/client").$Enums.SuiteType;
             currentGuest: Prisma.JsonValue | null;
-            bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+            bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
             amenities: string[];
             squareFeet: number | null;
             lastCleaned: Date | null;
@@ -340,11 +341,11 @@ export declare class TasksService {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -378,11 +379,11 @@ export declare class TasksService {
         } | null;
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;
@@ -406,11 +407,11 @@ export declare class TasksService {
     }>;
     remove(id: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
+        status: import(".prisma/client").$Enums.TaskStatus;
         createdAt: Date;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.TaskType;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        type: import(".prisma/client").$Enums.TaskType;
+        priority: import(".prisma/client").$Enums.TaskPriority;
         title: string;
         description: string | null;
         scheduledStart: Date | null;

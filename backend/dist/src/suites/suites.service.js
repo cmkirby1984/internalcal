@@ -8,15 +8,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var SuitesService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SuitesService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_1 = require("../prisma");
+const prisma_service_1 = require("../prisma/prisma.service");
 const client_1 = require("@prisma/client");
-let SuitesService = class SuitesService {
+const event_emitter_1 = require("@nestjs/event-emitter");
+let SuitesService = SuitesService_1 = class SuitesService {
     prisma;
-    constructor(prisma) {
+    eventEmitter;
+    logger = new common_1.Logger(SuitesService_1.name);
+    constructor(prisma, eventEmitter) {
         this.prisma = prisma;
+        this.eventEmitter = eventEmitter;
     }
     async create(createSuiteDto) {
         try {
@@ -37,55 +42,44 @@ let SuitesService = class SuitesService {
             throw error;
         }
     }
-    async findAll(filters) {
-        const { page = 1, limit = 20, status, type, floor, search, sortBy, sortOrder } = filters;
-        const skip = (page - 1) * limit;
-        const where = {};
-        if (status)
-            where.status = status;
-        if (type)
-            where.type = type;
-        if (floor)
-            where.floor = floor;
-        if (search) {
-            where.OR = [
-                { suiteNumber: { contains: search, mode: 'insensitive' } },
-                { notes: { contains: search, mode: 'insensitive' } },
-            ];
-        }
-        const orderBy = {};
-        if (sortBy) {
-            orderBy[sortBy] = sortOrder || 'asc';
-        }
-        else {
+    async findAll(paginationDto) {
+        try {
+            const page = paginationDto.page ?? 1;
+            const limit = paginationDto.limit ?? 20;
+            const offset = (page - 1) * limit;
+            const where = {};
+            const orderBy = {};
             orderBy.suiteNumber = 'asc';
-        }
-        const [data, total] = await Promise.all([
-            this.prisma.suite.findMany({
-                where,
-                skip,
-                take: limit,
-                orderBy,
-                include: {
-                    tasks: {
-                        where: {
-                            status: { in: ['PENDING', 'ASSIGNED', 'IN_PROGRESS'] },
+            const [data, total] = await Promise.all([
+                this.prisma.suite.findMany({
+                    skip: offset,
+                    take: limit,
+                    orderBy,
+                    include: {
+                        tasks: {
+                            where: {
+                                status: { in: ['PENDING', 'ASSIGNED', 'IN_PROGRESS'] },
+                            },
+                            select: { id: true, type: true, status: true, priority: true },
                         },
-                        select: { id: true, type: true, status: true, priority: true },
                     },
+                }),
+                this.prisma.suite.count({ where }),
+            ]);
+            return {
+                data,
+                meta: {
+                    total,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(total / limit),
                 },
-            }),
-            this.prisma.suite.count({ where }),
-        ]);
-        return {
-            data,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages: Math.ceil(total / limit),
-            },
-        };
+            };
+        }
+        catch (error) {
+            this.logger.error(`Failed to fetch suites: ${error.message}`, error.stack);
+            throw new common_1.InternalServerErrorException('Failed to load suites.');
+        }
     }
     async findOne(id) {
         const suite = await this.prisma.suite.findUnique({
@@ -182,8 +176,9 @@ let SuitesService = class SuitesService {
     }
 };
 exports.SuitesService = SuitesService;
-exports.SuitesService = SuitesService = __decorate([
+exports.SuitesService = SuitesService = SuitesService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        event_emitter_1.EventEmitter2])
 ], SuitesService);
 //# sourceMappingURL=suites.service.js.map

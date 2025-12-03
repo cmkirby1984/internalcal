@@ -41,6 +41,7 @@ const prisma = new client_1.PrismaClient({
 });
 async function main() {
     console.log('🌱 Starting database seed...');
+    // Create admin user
     const adminPassword = await argon2.hash('admin123');
     const admin = await prisma.employee.upsert({
         where: { username: 'admin' },
@@ -62,6 +63,7 @@ async function main() {
         },
     });
     console.log(`✅ Created admin user: ${admin.username}`);
+    // Create supervisor
     const supervisorPassword = await argon2.hash('supervisor123');
     const supervisor = await prisma.employee.upsert({
         where: { username: 'supervisor' },
@@ -82,6 +84,7 @@ async function main() {
         },
     });
     console.log(`✅ Created supervisor: ${supervisor.username}`);
+    // Create housekeeper
     const housekeeperPassword = await argon2.hash('housekeeper123');
     const housekeeper = await prisma.employee.upsert({
         where: { username: 'housekeeper1' },
@@ -102,6 +105,7 @@ async function main() {
         },
     });
     console.log(`✅ Created housekeeper: ${housekeeper.username}`);
+    // Create maintenance worker
     const maintenancePassword = await argon2.hash('maintenance123');
     const maintenance = await prisma.employee.upsert({
         where: { username: 'maintenance1' },
@@ -122,6 +126,7 @@ async function main() {
         },
     });
     console.log(`✅ Created maintenance worker: ${maintenance.username}`);
+    // Create sample suites
     const suiteTypes = ['STANDARD', 'DELUXE', 'SUITE', 'ACCESSIBLE'];
     const bedConfigs = ['QUEEN', 'KING', 'TWIN_BEDS', 'QUEEN_PLUS_SOFA'];
     const statuses = ['VACANT_CLEAN', 'VACANT_DIRTY', 'OCCUPIED_CLEAN', 'OCCUPIED_DIRTY'];
@@ -148,6 +153,7 @@ async function main() {
         }
     }
     console.log('✅ Created 24 sample suites');
+    // Create sample tasks
     const dirtySuites = await prisma.suite.findMany({
         where: { status: { in: ['VACANT_DIRTY', 'OCCUPIED_DIRTY'] } },
         take: 5,
@@ -166,6 +172,7 @@ async function main() {
         });
     }
     console.log(`✅ Created ${dirtySuites.length} cleaning tasks`);
+    // Create a maintenance task
     const suite101 = await prisma.suite.findUnique({ where: { suiteNumber: '101' } });
     if (suite101) {
         await prisma.task.create({
@@ -182,6 +189,7 @@ async function main() {
         });
         console.log('✅ Created maintenance task');
     }
+    // Create sample notes
     await prisma.note.create({
         data: {
             type: 'HANDOFF',
@@ -203,7 +211,7 @@ async function main() {
             createdById: admin.id,
             visibility: 'MANAGERS_ONLY',
             requiresFollowUp: true,
-            followUpDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            followUpDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
             followUpAssignedToId: maintenance.id,
         },
     });
@@ -225,4 +233,3 @@ main()
     .finally(async () => {
     await prisma.$disconnect();
 });
-//# sourceMappingURL=seed.js.map

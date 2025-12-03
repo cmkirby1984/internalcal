@@ -1,19 +1,24 @@
-import { PrismaService } from '../prisma';
-import { CreateSuiteDto, UpdateSuiteDto, FilterSuitesDto } from './dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { CreateSuiteDto } from './dto/create-suite.dto';
+import { UpdateSuiteDto } from './dto/update-suite.dto';
 import { Prisma } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 export declare class SuitesService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly eventEmitter;
+    private readonly logger;
+    constructor(prisma: PrismaService, eventEmitter: EventEmitter2);
     create(createSuiteDto: CreateSuiteDto): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
+        type: import(".prisma/client").$Enums.SuiteType;
         currentGuest: Prisma.JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -21,24 +26,24 @@ export declare class SuitesService {
         nextScheduledMaintenance: Date | null;
         notes: string | null;
     }>;
-    findAll(filters: FilterSuitesDto): Promise<{
+    findAll(paginationDto: PaginationDto): Promise<{
         data: ({
             tasks: {
                 id: string;
-                status: import("@prisma/client").$Enums.TaskStatus;
-                type: import("@prisma/client").$Enums.TaskType;
-                priority: import("@prisma/client").$Enums.TaskPriority;
+                status: import(".prisma/client").$Enums.TaskStatus;
+                type: import(".prisma/client").$Enums.TaskType;
+                priority: import(".prisma/client").$Enums.TaskPriority;
             }[];
         } & {
             id: string;
-            status: import("@prisma/client").$Enums.SuiteStatus;
+            status: import(".prisma/client").$Enums.SuiteStatus;
             createdAt: Date;
             updatedAt: Date;
             suiteNumber: string;
             floor: number;
-            type: import("@prisma/client").$Enums.SuiteType;
+            type: import(".prisma/client").$Enums.SuiteType;
             currentGuest: Prisma.JsonValue | null;
-            bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+            bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
             amenities: string[];
             squareFeet: number | null;
             lastCleaned: Date | null;
@@ -58,11 +63,11 @@ export declare class SuitesService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.NoteType;
-            priority: import("@prisma/client").$Enums.NotePriority;
+            type: import(".prisma/client").$Enums.NoteType;
+            priority: import(".prisma/client").$Enums.NotePriority;
             title: string | null;
             content: string;
-            visibility: import("@prisma/client").$Enums.NoteVisibility;
+            visibility: import(".prisma/client").$Enums.NoteVisibility;
             pinned: boolean;
             archived: boolean;
             tags: string[];
@@ -95,11 +100,11 @@ export declare class SuitesService {
         }[];
         tasks: {
             id: string;
-            status: import("@prisma/client").$Enums.TaskStatus;
+            status: import(".prisma/client").$Enums.TaskStatus;
             createdAt: Date;
             updatedAt: Date;
-            type: import("@prisma/client").$Enums.TaskType;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            type: import(".prisma/client").$Enums.TaskType;
+            priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
             description: string | null;
             scheduledStart: Date | null;
@@ -123,14 +128,14 @@ export declare class SuitesService {
         }[];
     } & {
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
+        type: import(".prisma/client").$Enums.SuiteType;
         currentGuest: Prisma.JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -140,14 +145,14 @@ export declare class SuitesService {
     }>;
     findByNumber(suiteNumber: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
+        type: import(".prisma/client").$Enums.SuiteType;
         currentGuest: Prisma.JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -157,14 +162,14 @@ export declare class SuitesService {
     }>;
     update(id: string, updateSuiteDto: UpdateSuiteDto): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
+        type: import(".prisma/client").$Enums.SuiteType;
         currentGuest: Prisma.JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -174,14 +179,14 @@ export declare class SuitesService {
     }>;
     updateStatus(id: string, status: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
+        type: import(".prisma/client").$Enums.SuiteType;
         currentGuest: Prisma.JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;
@@ -191,14 +196,14 @@ export declare class SuitesService {
     }>;
     remove(id: string): Promise<{
         id: string;
-        status: import("@prisma/client").$Enums.SuiteStatus;
+        status: import(".prisma/client").$Enums.SuiteStatus;
         createdAt: Date;
         updatedAt: Date;
         suiteNumber: string;
         floor: number;
-        type: import("@prisma/client").$Enums.SuiteType;
+        type: import(".prisma/client").$Enums.SuiteType;
         currentGuest: Prisma.JsonValue | null;
-        bedConfiguration: import("@prisma/client").$Enums.BedConfiguration;
+        bedConfiguration: import(".prisma/client").$Enums.BedConfiguration;
         amenities: string[];
         squareFeet: number | null;
         lastCleaned: Date | null;

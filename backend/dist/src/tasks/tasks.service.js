@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var TasksService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TasksService = void 0;
 const common_1 = require("@nestjs/common");
@@ -16,10 +17,11 @@ const prisma_1 = require("../prisma");
 const client_1 = require("@prisma/client");
 const events_1 = require("../domain/events");
 const status_1 = require("../domain/status");
-let TasksService = class TasksService {
+let TasksService = TasksService_1 = class TasksService {
     prisma;
     eventEmitter;
     taskStatusService;
+    logger = new common_1.Logger(TasksService_1.name);
     constructor(prisma, eventEmitter, taskStatusService) {
         this.prisma = prisma;
         this.eventEmitter = eventEmitter;
@@ -62,62 +64,69 @@ let TasksService = class TasksService {
         return task;
     }
     async findAll(filters) {
-        const { page = 1, limit = 20, status, type, priority, assignedToId, suiteId, scheduledAfter, scheduledBefore, search, sortBy, sortOrder, } = filters;
-        const skip = (page - 1) * limit;
-        const where = {};
-        if (status)
-            where.status = status;
-        if (type)
-            where.type = type;
-        if (priority)
-            where.priority = priority;
-        if (assignedToId)
-            where.assignedToId = assignedToId;
-        if (suiteId)
-            where.suiteId = suiteId;
-        if (scheduledAfter || scheduledBefore) {
-            where.scheduledStart = {};
-            if (scheduledAfter)
-                where.scheduledStart.gte = new Date(scheduledAfter);
-            if (scheduledBefore)
-                where.scheduledStart.lte = new Date(scheduledBefore);
-        }
-        if (search) {
-            where.OR = [
-                { title: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-            ];
-        }
-        const orderBy = {};
-        if (sortBy) {
-            orderBy[sortBy] = sortOrder || 'desc';
-        }
-        else {
-            orderBy.createdAt = 'desc';
-        }
-        const [data, total] = await Promise.all([
-            this.prisma.task.findMany({
-                where,
-                skip,
-                take: limit,
-                orderBy,
-                include: {
-                    suite: { select: { id: true, suiteNumber: true } },
-                    assignedTo: { select: { id: true, firstName: true, lastName: true } },
-                    assignedBy: { select: { id: true, firstName: true, lastName: true } },
+        try {
+            const { page = 1, limit = 20, status, type, priority, assignedToId, suiteId, scheduledAfter, scheduledBefore, search, sortBy, sortOrder, } = filters;
+            const skip = (page - 1) * limit;
+            const where = {};
+            if (status)
+                where.status = status;
+            if (type)
+                where.type = type;
+            if (priority)
+                where.priority = priority;
+            if (assignedToId)
+                where.assignedToId = assignedToId;
+            if (suiteId)
+                where.suiteId = suiteId;
+            if (scheduledAfter || scheduledBefore) {
+                where.scheduledStart = {};
+                if (scheduledAfter)
+                    where.scheduledStart.gte = new Date(scheduledAfter);
+                if (scheduledBefore)
+                    where.scheduledStart.lte = new Date(scheduledBefore);
+            }
+            if (search) {
+                where.OR = [
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } },
+                ];
+            }
+            const orderBy = {};
+            if (sortBy) {
+                orderBy[sortBy] = sortOrder || 'desc';
+            }
+            else {
+                orderBy.createdAt = 'desc';
+            }
+            const [data, total] = await Promise.all([
+                this.prisma.task.findMany({
+                    where,
+                    skip,
+                    take: limit,
+                    orderBy,
+                    include: {
+                        suite: { select: { id: true, suiteNumber: true } },
+                        assignedTo: { select: { id: true, firstName: true, lastName: true } },
+                        assignedBy: { select: { id: true, firstName: true, lastName: true } },
+                    },
+                }),
+                this.prisma.task.count({ where }),
+            ]);
+            this.logger.log(`Found ${total} tasks with filters: ${JSON.stringify(filters)}`);
+            return {
+                data,
+                meta: {
+                    total,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(total / limit),
                 },
-            }),
-            this.prisma.task.count({ where }),
-        ]);
-        return {
-            data,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages: Math.ceil(total / limit),
-            },
-        };
+            };
+        }
+        catch (error) {
+            this.logger.error(`Failed to fetch tasks: ${error.message}`, error.stack);
+            throw new common_1.InternalServerErrorException('Failed to load tasks.');
+        }
     }
     async findOne(id) {
         const task = await this.prisma.task.findUnique({
@@ -306,7 +315,7 @@ let TasksService = class TasksService {
     }
 };
 exports.TasksService = TasksService;
-exports.TasksService = TasksService = __decorate([
+exports.TasksService = TasksService = TasksService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_1.PrismaService,
         event_emitter_1.EventEmitter2,

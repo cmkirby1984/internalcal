@@ -1,158 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Card } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { SuiteGrid, SuiteFilters } from '@/components/suites';
 import { useSuitesStore, useUIStore } from '@/lib/store';
 import { UISuite, SuiteStatus, SuiteType } from '@/lib/types';
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   MOCK DATA (Replace with real API calls)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-const mockSuites: UISuite[] = [
-  {
-    id: '1',
-    suiteNumber: '101',
-    floor: 1,
-    type: SuiteType.STANDARD,
-    status: SuiteStatus.VACANT_CLEAN,
-    bedConfiguration: '1 King Bed',
-    amenities: ['TV', 'WiFi', 'AC'],
-    maxOccupancy: 2,
-    currentGuest: null,
-    lastCleaned: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    activeTasks: [],
-    notes: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    suiteNumber: '102',
-    floor: 1,
-    type: SuiteType.STANDARD,
-    status: SuiteStatus.OCCUPIED_CLEAN,
-    bedConfiguration: '2 Queen Beds',
-    amenities: ['TV', 'WiFi', 'AC'],
-    maxOccupancy: 4,
-    currentGuest: {
-      name: 'John Smith',
-      checkIn: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-      checkOut: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString(),
-    },
-    lastCleaned: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    activeTasks: [],
-    notes: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    suiteNumber: '103',
-    floor: 1,
-    type: SuiteType.DELUXE,
-    status: SuiteStatus.VACANT_DIRTY,
-    bedConfiguration: '1 King Bed',
-    amenities: ['TV', 'WiFi', 'AC', 'Mini Bar'],
-    maxOccupancy: 2,
-    currentGuest: null,
-    lastCleaned: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    activeTasks: ['task-1'],
-    notes: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    suiteNumber: '201',
-    floor: 2,
-    type: SuiteType.SUITE,
-    status: SuiteStatus.OCCUPIED_DIRTY,
-    bedConfiguration: '1 King Bed + Sofa',
-    amenities: ['TV', 'WiFi', 'AC', 'Mini Bar', 'Jacuzzi'],
-    maxOccupancy: 3,
-    currentGuest: {
-      name: 'Sarah Johnson',
-      checkIn: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-      checkOut: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-    },
-    lastCleaned: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-    activeTasks: ['task-2'],
-    notes: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '5',
-    suiteNumber: '202',
-    floor: 2,
-    type: SuiteType.STANDARD,
-    status: SuiteStatus.OUT_OF_ORDER,
-    bedConfiguration: '2 Double Beds',
-    amenities: ['TV', 'WiFi', 'AC'],
-    maxOccupancy: 4,
-    currentGuest: null,
-    lastCleaned: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
-    activeTasks: ['task-3'],
-    notes: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '6',
-    suiteNumber: '203',
-    floor: 2,
-    type: SuiteType.ACCESSIBLE,
-    status: SuiteStatus.VACANT_CLEAN,
-    bedConfiguration: '1 King Bed',
-    amenities: ['TV', 'WiFi', 'AC', 'Accessible Bathroom'],
-    maxOccupancy: 2,
-    currentGuest: null,
-    lastCleaned: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-    activeTasks: [],
-    notes: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '7',
-    suiteNumber: '301',
-    floor: 3,
-    type: SuiteType.SUITE,
-    status: SuiteStatus.BLOCKED,
-    bedConfiguration: '1 King Bed + 2 Queen Beds',
-    amenities: ['TV', 'WiFi', 'AC', 'Mini Bar', 'Jacuzzi', 'Kitchen', 'Balcony'],
-    maxOccupancy: 6,
-    currentGuest: null,
-    lastCleaned: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-    activeTasks: [],
-    notes: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '8',
-    suiteNumber: '302',
-    floor: 3,
-    type: SuiteType.DELUXE,
-    status: SuiteStatus.OCCUPIED_CLEAN,
-    bedConfiguration: '1 King Bed',
-    amenities: ['TV', 'WiFi', 'AC', 'Mini Bar'],
-    maxOccupancy: 2,
-    currentGuest: {
-      name: 'Michael Brown',
-      checkIn: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-      checkOut: new Date(Date.now() + 1000 * 60 * 60 * 24 * 5).toISOString(),
-    },
-    lastCleaned: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-    activeTasks: [],
-    notes: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SUITES PAGE
@@ -164,6 +17,12 @@ export default function SuitesPage() {
   const router = useRouter();
   const openModal = useUIStore((state) => state.openModal);
   
+  // Store state
+  const suitesMap = useSuitesStore((state) => state.items);
+  const isLoading = useSuitesStore((state) => state.isLoading);
+  const fetchAllSuites = useSuitesStore((state) => state.fetchAllSuites);
+  const updateSuiteStatus = useSuitesStore((state) => state.updateSuiteStatus);
+
   // Local state
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -174,9 +33,13 @@ export default function SuitesPage() {
     needsCleaning?: boolean;
   }>({});
 
-  // Use mock data for now
-  const suites = mockSuites;
-  const isLoading = false;
+  // Fetch data on mount
+  useEffect(() => {
+    fetchAllSuites();
+  }, [fetchAllSuites]);
+
+  // Convert map to array
+  const suites = useMemo(() => Object.values(suitesMap), [suitesMap]);
 
   // Filter suites
   const filteredSuites = useMemo(() => {
@@ -214,9 +77,8 @@ export default function SuitesPage() {
     router.push(`/suites/${suite.id}`);
   };
 
-  const handleStatusChange = (suiteId: string, status: SuiteStatus) => {
-    // TODO: Implement status change
-    console.log('Status change:', suiteId, status);
+  const handleStatusChange = async (suiteId: string, status: SuiteStatus) => {
+    await updateSuiteStatus(suiteId, status);
   };
 
   const handleCreateSuite = () => {
