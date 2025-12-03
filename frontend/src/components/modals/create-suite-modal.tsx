@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Modal, Button, Input, Textarea, Select } from '@/components/ui';
-import { useUIStore } from '@/lib/store';
-import { SuiteType, SuiteStatus, BedConfiguration } from '@/lib/types';
+import { useUIStore, useSuitesStore } from '@/lib/store';
+import { SuiteType, BedConfiguration } from '@/lib/types';
 import { formatEnumValue } from '@/lib/utils';
 
 const suiteTypeOptions = Object.values(SuiteType).map(type => ({
@@ -26,7 +26,7 @@ const floorOptions = [
 export function CreateSuiteModal() {
   const activeModal = useUIStore((state) => state.activeModal);
   const closeModal = useUIStore((state) => state.closeModal);
-  const showToast = useUIStore((state) => state.showToast);
+  const createSuite = useSuitesStore((state) => state.createSuite);
 
   const isOpen = activeModal === 'create-suite';
 
@@ -35,7 +35,6 @@ export function CreateSuiteModal() {
     floor: '1',
     type: SuiteType.STANDARD,
     bedConfiguration: BedConfiguration.QUEEN,
-    maxOccupancy: 2,
     amenities: '',
     notes: '',
   });
@@ -75,10 +74,15 @@ export function CreateSuiteModal() {
     setIsSubmitting(true);
     
     try {
-      // TODO: Call API to create suite
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await createSuite({
+        suiteNumber: formData.suiteNumber,
+        floor: parseInt(formData.floor),
+        type: formData.type,
+        bedConfiguration: formData.bedConfiguration,
+        amenities: formData.amenities ? formData.amenities.split(',').map(a => a.trim()).filter(Boolean) : [],
+        notes: formData.notes || undefined,
+      });
       
-      showToast({ type: 'SUCCESS', message: 'Suite created successfully' });
       closeModal();
       
       // Reset form
@@ -87,12 +91,11 @@ export function CreateSuiteModal() {
         floor: '1',
         type: SuiteType.STANDARD,
         bedConfiguration: BedConfiguration.QUEEN,
-        maxOccupancy: 2,
         amenities: '',
         notes: '',
       });
     } catch (error) {
-      showToast({ type: 'ERROR', message: 'Failed to create suite' });
+      // Error handling is done in the store
     } finally {
       setIsSubmitting(false);
     }
@@ -160,15 +163,6 @@ export function CreateSuiteModal() {
         </div>
 
         <Input
-          label="Max Occupancy"
-          type="number"
-          min={1}
-          max={10}
-          value={formData.maxOccupancy}
-          onChange={(e) => handleChange('maxOccupancy', parseInt(e.target.value))}
-        />
-
-        <Input
           label="Amenities"
           placeholder="e.g., TV, WiFi, AC, Mini Bar (comma separated)"
           value={formData.amenities}
@@ -187,4 +181,3 @@ export function CreateSuiteModal() {
     </Modal>
   );
 }
-

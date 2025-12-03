@@ -1,117 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Card, CardHeader, CardContent, Button, Avatar, Badge } from '@/components/ui';
-import { useUIStore } from '@/lib/store';
+import { useState, useMemo, useEffect } from 'react';
+import { Card, Button, Avatar, Badge } from '@/components/ui';
+import { useNotesStore, useUIStore, useEmployeesStore } from '@/lib/store';
 import { UINote, NoteType, NotePriority } from '@/lib/types';
 import { formatRelativeTime, formatEnumValue, cn } from '@/lib/utils';
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   MOCK DATA
-   ───────────────────────────────────────────────────────────────────────────── */
-
-const mockNotes: UINote[] = [
-  {
-    id: '1',
-    type: NoteType.GENERAL,
-    priority: NotePriority.HIGH,
-    title: 'VIP Guest Arriving Tomorrow',
-    content: 'Mr. Johnson (Suite 301) is a returning VIP guest. Please ensure the room is prepared with extra amenities and a welcome basket.',
-    createdBy: 'Sarah Johnson',
-    pinned: true,
-    archived: false,
-    relatedSuite: '7',
-    relatedTask: null,
-    relatedEmployee: null,
-    tags: ['VIP', 'Guest Request'],
-    requiresFollowUp: true,
-    followUpDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-    comments: [],
-    lastReadBy: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    type: NoteType.INCIDENT,
-    priority: NotePriority.URGENT,
-    title: 'Water Damage - Suite 202',
-    content: 'Pipe burst in bathroom causing water damage to carpet and lower wall. Maintenance has been notified. Suite is currently out of order.',
-    createdBy: 'Mike Wilson',
-    pinned: true,
-    archived: false,
-    relatedSuite: '5',
-    relatedTask: '6',
-    relatedEmployee: null,
-    tags: ['Maintenance', 'Urgent'],
-    requiresFollowUp: true,
-    followUpDate: new Date(Date.now() + 1000 * 60 * 60 * 4).toISOString(),
-    comments: [],
-    lastReadBy: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    type: NoteType.HANDOFF,
-    priority: NotePriority.NORMAL,
-    title: 'Shift Handover Notes - Evening',
-    content: 'All rooms on Floor 2 have been cleaned. Suite 201 guest requested late checkout (2pm). Laundry delivery expected at 8am tomorrow.',
-    createdBy: 'Emily Davis',
-    pinned: false,
-    archived: false,
-    relatedSuite: null,
-    relatedTask: null,
-    relatedEmployee: null,
-    tags: ['Handover', 'Evening Shift'],
-    requiresFollowUp: false,
-    followUpDate: null,
-    comments: [],
-    lastReadBy: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    type: NoteType.GUEST_REQUEST,
-    priority: NotePriority.NORMAL,
-    title: 'Positive Feedback - Suite 302',
-    content: 'Guest Michael Brown complimented the cleanliness and comfort of the room. Mentioned he will recommend to colleagues.',
-    createdBy: 'Lisa Martinez',
-    pinned: false,
-    archived: false,
-    relatedSuite: '8',
-    relatedTask: null,
-    relatedEmployee: '1',
-    tags: ['Feedback', 'Positive'],
-    requiresFollowUp: false,
-    followUpDate: null,
-    comments: [],
-    lastReadBy: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '5',
-    type: NoteType.MAINTENANCE,
-    priority: NotePriority.LOW,
-    title: 'AC Filter Replacement Schedule',
-    content: 'Monthly AC filter replacement completed for all suites on Floors 1 and 2. Floor 3 scheduled for next week.',
-    createdBy: 'John Smith',
-    pinned: false,
-    archived: false,
-    relatedSuite: null,
-    relatedTask: null,
-    relatedEmployee: null,
-    tags: ['Maintenance', 'Scheduled'],
-    requiresFollowUp: true,
-    followUpDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
-    comments: [],
-    lastReadBy: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 /* ─────────────────────────────────────────────────────────────────────────────
    NOTE CARD COMPONENT
@@ -156,7 +49,7 @@ function NoteCard({ note, onClick, onPin }: NoteCardProps) {
               </svg>
             )}
             <h3 className="font-semibold text-[var(--text-primary)] truncate">
-              {note.title}
+              {note.title || 'Untitled Note'}
             </h3>
           </div>
           <span className={cn('text-xs px-2 py-0.5 rounded-full', typeColors[note.type].bg, typeColors[note.type].text)}>
@@ -187,7 +80,7 @@ function NoteCard({ note, onClick, onPin }: NoteCardProps) {
       </p>
 
       {/* Tags */}
-      {note.tags.length > 0 && (
+      {note.tags && note.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-3">
           {note.tags.map((tag) => (
             <Badge key={tag} variant="default" size="sm">
@@ -200,8 +93,8 @@ function NoteCard({ note, onClick, onPin }: NoteCardProps) {
       {/* Footer */}
       <div className="pt-3 border-t border-[var(--border-light)] flex items-center justify-between text-xs text-[var(--text-muted)]">
         <div className="flex items-center gap-2">
-          <Avatar name={note.createdBy} size="xs" />
-          <span>{note.createdBy}</span>
+          <Avatar name={note.createdBy || 'Unknown'} size="xs" />
+          <span>{note.createdBy || 'Unknown'}</span>
         </div>
         <span>{formatRelativeTime(note.createdAt)}</span>
       </div>
@@ -228,20 +121,50 @@ function NoteCard({ note, onClick, onPin }: NoteCardProps) {
 export default function NotesPage() {
   const openModal = useUIStore((state) => state.openModal);
   
+  // Store state
+  const notesMap = useNotesStore((state) => state.items);
+  const isLoading = useNotesStore((state) => state.isLoading);
+  const fetchAllNotes = useNotesStore((state) => state.fetchAllNotes);
+  const togglePinNote = useNotesStore((state) => state.togglePinNote);
+  
+  const employeesMap = useEmployeesStore((state) => state.items);
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchAllNotes();
+  }, [fetchAllNotes]);
+
   const [filter, setFilter] = useState<'all' | 'pinned' | NoteType>('all');
-  const notes = mockNotes;
+
+  // Convert map to array with creator names
+  const notes = useMemo(() => {
+    return Object.values(notesMap).map(note => {
+      const creator = note.createdById ? employeesMap[note.createdById] : null;
+      return {
+        ...note,
+        createdBy: creator ? `${creator.firstName} ${creator.lastName}` : 'Unknown',
+        tags: note.tags || [],
+        comments: note.comments || [],
+        lastReadBy: note.readReceipts?.map(r => r.employeeId) || [],
+      } as UINote;
+    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [notesMap, employeesMap]);
 
   const filteredNotes = useMemo(() => {
-    if (filter === 'all') return notes;
-    if (filter === 'pinned') return notes.filter(n => n.pinned);
-    return notes.filter(n => n.type === filter);
+    if (filter === 'all') return notes.filter(n => !n.archived);
+    if (filter === 'pinned') return notes.filter(n => n.pinned && !n.archived);
+    return notes.filter(n => n.type === filter && !n.archived);
   }, [notes, filter]);
 
-  const pinnedNotes = notes.filter(n => n.pinned);
+  const pinnedNotes = notes.filter(n => n.pinned && !n.archived);
   const recentNotes = filteredNotes.filter(n => !n.pinned);
 
   const handleCreateNote = () => {
     openModal('create-note');
+  };
+
+  const handlePinNote = async (noteId: string) => {
+    await togglePinNote(noteId);
   };
 
   return (
@@ -307,8 +230,18 @@ export default function NotesPage() {
         ))}
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 border-2 border-[var(--primary-600)] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[var(--text-secondary)]">Loading notes...</span>
+          </div>
+        </div>
+      )}
+
       {/* Pinned Notes */}
-      {filter !== 'pinned' && pinnedNotes.length > 0 && (
+      {!isLoading && filter !== 'pinned' && pinnedNotes.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
             <svg className="w-5 h-5 text-[var(--primary-600)]" fill="currentColor" viewBox="0 0 20 20">
@@ -318,30 +251,47 @@ export default function NotesPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {pinnedNotes.map((note) => (
-              <NoteCard key={note.id} note={note} />
+              <NoteCard 
+                key={note.id} 
+                note={note} 
+                onPin={() => handlePinNote(note.id)}
+              />
             ))}
           </div>
         </div>
       )}
 
       {/* Recent Notes */}
-      <div>
-        {filter !== 'pinned' && pinnedNotes.length > 0 && (
-          <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Recent Notes</h2>
-        )}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(filter === 'pinned' ? pinnedNotes : recentNotes).map((note) => (
-            <NoteCard key={note.id} note={note} />
-          ))}
-        </div>
-        
-        {filteredNotes.length === 0 && (
-          <div className="text-center py-12 text-[var(--text-muted)]">
-            No notes found
+      {!isLoading && (
+        <div>
+          {filter !== 'pinned' && pinnedNotes.length > 0 && (
+            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Recent Notes</h2>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(filter === 'pinned' ? pinnedNotes : recentNotes).map((note) => (
+              <NoteCard 
+                key={note.id} 
+                note={note}
+                onPin={() => handlePinNote(note.id)}
+              />
+            ))}
           </div>
-        )}
-      </div>
+          
+          {filteredNotes.length === 0 && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--bg-muted)] flex items-center justify-center">
+                <svg className="w-8 h-8 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <p className="text-[var(--text-muted)]">No notes found</p>
+              <Button variant="outline" size="sm" className="mt-4" onClick={handleCreateNote}>
+                Create your first note
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
-

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Modal, Button, Input, Textarea, Select } from '@/components/ui';
-import { useUIStore } from '@/lib/store';
+import { useUIStore, useNotesStore, useSuitesStore } from '@/lib/store';
 import { NoteType, NotePriority, NoteVisibility } from '@/lib/types';
 import { formatEnumValue } from '@/lib/utils';
 
@@ -24,7 +24,8 @@ const visibilityOptions = Object.values(NoteVisibility).map(visibility => ({
 export function CreateNoteModal() {
   const activeModal = useUIStore((state) => state.activeModal);
   const closeModal = useUIStore((state) => state.closeModal);
-  const showToast = useUIStore((state) => state.showToast);
+  const createNote = useNotesStore((state) => state.createNote);
+  const suitesMap = useSuitesStore((state) => state.items);
 
   const isOpen = activeModal === 'create-note';
 
@@ -37,11 +38,22 @@ export function CreateNoteModal() {
     tags: '',
     requiresFollowUp: false,
     followUpDate: '',
-    relatedSuite: '',
+    relatedSuiteId: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Build suite options
+  const suiteOptions = useMemo(() => {
+    return [
+      { value: '', label: 'No suite' },
+      ...Object.values(suitesMap).map(suite => ({
+        value: suite.id,
+        label: `Suite ${suite.suiteNumber}`,
+      })),
+    ];
+  }, [suitesMap]);
 
   const handleChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -79,10 +91,18 @@ export function CreateNoteModal() {
     setIsSubmitting(true);
     
     try {
-      // TODO: Call API to create note
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await createNote({
+        title: formData.title,
+        content: formData.content,
+        type: formData.type,
+        priority: formData.priority,
+        visibility: formData.visibility,
+        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+        requiresFollowUp: formData.requiresFollowUp,
+        followUpDate: formData.followUpDate || undefined,
+        relatedSuiteId: formData.relatedSuiteId || undefined,
+      });
       
-      showToast({ type: 'SUCCESS', message: 'Note created successfully' });
       closeModal();
       
       // Reset form
@@ -95,10 +115,10 @@ export function CreateNoteModal() {
         tags: '',
         requiresFollowUp: false,
         followUpDate: '',
-        relatedSuite: '',
+        relatedSuiteId: '',
       });
     } catch (error) {
-      showToast({ type: 'ERROR', message: 'Failed to create note' });
+      // Error handling is done in the store
     } finally {
       setIsSubmitting(false);
     }
@@ -177,11 +197,11 @@ export function CreateNoteModal() {
           helperText="Enter tags separated by commas"
         />
 
-        <Input
+        <Select
           label="Related Suite (Optional)"
-          placeholder="e.g., 101"
-          value={formData.relatedSuite}
-          onChange={(e) => handleChange('relatedSuite', e.target.value)}
+          options={suiteOptions}
+          value={formData.relatedSuiteId}
+          onChange={(value) => handleChange('relatedSuiteId', value)}
         />
 
         <div className="space-y-3 pt-2 border-t border-[var(--border-light)]">
@@ -210,4 +230,3 @@ export function CreateNoteModal() {
     </Modal>
   );
 }
-

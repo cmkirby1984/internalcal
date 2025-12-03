@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn, getEmployeeFullName } from '@/lib/utils';
 import { Avatar, Button } from '@/components/ui';
-import { useAuthStore, useUIStore, useNotificationsStore } from '@/lib/store';
+import { useAuthStore, useUIStore, useNotificationsStore, useSyncStore } from '@/lib/store';
+import { useWebSocket } from '@/lib/realtime';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PAGE TITLES
@@ -47,6 +48,11 @@ export function Header() {
   const notificationItems = useNotificationsStore((state) => state.items);
   const unreadCount = useNotificationsStore((state) => state.unreadCount);
   const notifications = Object.values(notificationItems);
+
+  // Connection status
+  const { isConnected, connectionState } = useWebSocket();
+  const pendingChanges = useSyncStore((state) => state.pendingChanges);
+  const isOnline = useSyncStore((state) => state.isOnline);
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -111,6 +117,39 @@ export function Header() {
 
         {/* Right Section */}
         <div className="flex items-center gap-2">
+          {/* Connection Status Indicator */}
+          <div className="hidden sm:flex items-center gap-2">
+            {pendingChanges.length > 0 && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                {pendingChanges.length} pending
+              </div>
+            )}
+            <div
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors',
+                isConnected
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : connectionState === 'RECONNECTING'
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-red-100 text-red-700'
+              )}
+              title={`Status: ${connectionState}${!isOnline ? ' (Offline)' : ''}`}
+            >
+              <div
+                className={cn(
+                  'w-2 h-2 rounded-full',
+                  isConnected
+                    ? 'bg-emerald-500'
+                    : connectionState === 'RECONNECTING'
+                    ? 'bg-amber-500 animate-pulse'
+                    : 'bg-red-500'
+                )}
+              />
+              {isConnected ? 'Live' : connectionState === 'RECONNECTING' ? 'Reconnecting' : 'Offline'}
+            </div>
+          </div>
+
           {/* Quick Add Button */}
           <Button
             size="sm"

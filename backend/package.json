@@ -37,7 +37,9 @@
     "@nestjs/jwt": "^11.0.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-socket.io": "^11.1.9",
     "@nestjs/swagger": "^11.2.3",
+    "@nestjs/websockets": "^11.1.9",
     "@prisma/client": "5.22.0",
     "argon2": "^0.44.0",
     "bull": "^4.16.5",
@@ -48,7 +50,8 @@
     "passport-jwt": "^4.0.1",
     "prisma": "5.22.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

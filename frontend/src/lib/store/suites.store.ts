@@ -8,11 +8,12 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { SuitesStore, SuiteFilters } from '../types/state';
 import type { Suite } from '../types/entities';
-import { SuiteSortBy, SortOrder, SuiteStatus } from '../types/enums';
+import { SuiteSortBy, SortOrder, SuiteStatus, SyncOperation } from '../types/enums';
 import { suitesApi } from '../api/endpoints';
 import { useUIStore } from './ui.store';
 import { useTasksStore } from './tasks.store';
 import { useNotesStore } from './notes.store';
+import { useSyncStore } from './sync.store';
 
 const initialFilters: SuiteFilters = {
   status: null,
@@ -99,6 +100,37 @@ export const useSuitesStore = create<SuitesStore>()(
 
       createSuite: async (suiteData: Partial<Suite>) => {
         try {
+          const { isOnline, addPendingChange } = useSyncStore.getState();
+
+          // If offline, queue the change
+          if (!isOnline) {
+            const tempId = `temp-${Date.now()}`;
+            const tempSuite = {
+              ...suiteData,
+              id: tempId,
+              status: SuiteStatus.VACANT_CLEAN,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            } as Suite;
+
+            get().addSuite(tempSuite);
+
+            addPendingChange({
+              entityType: 'suite',
+              entityId: tempId,
+              operation: SyncOperation.CREATE,
+              data: suiteData as Record<string, unknown>,
+            });
+
+            useUIStore.getState().showToast({
+              type: 'INFO',
+              message: 'Suite saved offline. Will sync when connected.',
+              duration: 3000,
+            });
+
+            return tempSuite;
+          }
+
           const newSuite = await suitesApi.create(suiteData);
           get().addSuite(newSuite);
           useUIStore.getState().showToast({
@@ -122,6 +154,19 @@ export const useSuitesStore = create<SuitesStore>()(
         
         // Optimistic update
         get().updateSuiteLocal(suiteId, updates);
+
+        const { isOnline, addPendingChange } = useSyncStore.getState();
+
+        // If offline, queue the change
+        if (!isOnline) {
+          addPendingChange({
+            entityType: 'suite',
+            entityId: suiteId,
+            operation: SyncOperation.UPDATE,
+            data: updates as Record<string, unknown>,
+          });
+          return;
+        }
 
         try {
           const updatedSuite = await suitesApi.update(suiteId, updates);

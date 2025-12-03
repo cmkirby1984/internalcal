@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Modal, Button, Input, Textarea, Select } from '@/components/ui';
-import { useUIStore, useTasksStore } from '@/lib/store';
+import { useUIStore, useTasksStore, useSuitesStore, useEmployeesStore } from '@/lib/store';
 import { TaskType, TaskPriority } from '@/lib/types';
 import { formatEnumValue } from '@/lib/utils';
 
@@ -19,7 +19,11 @@ const priorityOptions = Object.values(TaskPriority).map(priority => ({
 export function CreateTaskModal() {
   const activeModal = useUIStore((state) => state.activeModal);
   const closeModal = useUIStore((state) => state.closeModal);
-  const showToast = useUIStore((state) => state.showToast);
+  const createTask = useTasksStore((state) => state.createTask);
+  
+  // Get suites and employees for dropdowns
+  const suitesMap = useSuitesStore((state) => state.items);
+  const employeesMap = useEmployeesStore((state) => state.items);
 
   const isOpen = activeModal === 'create-task';
 
@@ -29,12 +33,36 @@ export function CreateTaskModal() {
     type: TaskType.CLEANING,
     priority: TaskPriority.NORMAL,
     suiteId: '',
-    assignedTo: '',
+    assignedToId: '',
     estimatedDuration: 30,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Build suite options
+  const suiteOptions = useMemo(() => {
+    return [
+      { value: '', label: 'No suite' },
+      ...Object.values(suitesMap).map(suite => ({
+        value: suite.id,
+        label: `Suite ${suite.suiteNumber}`,
+      })),
+    ];
+  }, [suitesMap]);
+
+  // Build employee options
+  const employeeOptions = useMemo(() => {
+    return [
+      { value: '', label: 'Unassigned' },
+      ...Object.values(employeesMap)
+        .filter(emp => emp.isOnDuty)
+        .map(emp => ({
+          value: emp.id,
+          label: `${emp.firstName} ${emp.lastName}`,
+        })),
+    ];
+  }, [employeesMap]);
 
   const handleChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -68,10 +96,16 @@ export function CreateTaskModal() {
     setIsSubmitting(true);
     
     try {
-      // TODO: Call API to create task
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await createTask({
+        title: formData.title,
+        description: formData.description || undefined,
+        type: formData.type,
+        priority: formData.priority,
+        suiteId: formData.suiteId || undefined,
+        assignedToId: formData.assignedToId || undefined,
+        estimatedDuration: formData.estimatedDuration,
+      });
       
-      showToast({ type: 'SUCCESS', message: 'Task created successfully' });
       closeModal();
       
       // Reset form
@@ -81,11 +115,11 @@ export function CreateTaskModal() {
         type: TaskType.CLEANING,
         priority: TaskPriority.NORMAL,
         suiteId: '',
-        assignedTo: '',
+        assignedToId: '',
         estimatedDuration: 30,
       });
     } catch (error) {
-      showToast({ type: 'ERROR', message: 'Failed to create task' });
+      // Error handling is done in the store
     } finally {
       setIsSubmitting(false);
     }
@@ -151,18 +185,18 @@ export function CreateTaskModal() {
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <Input
+          <Select
             label="Suite (Optional)"
-            placeholder="Select suite"
+            options={suiteOptions}
             value={formData.suiteId}
-            onChange={(e) => handleChange('suiteId', e.target.value)}
+            onChange={(value) => handleChange('suiteId', value)}
           />
           
-          <Input
+          <Select
             label="Assign To (Optional)"
-            placeholder="Select employee"
-            value={formData.assignedTo}
-            onChange={(e) => handleChange('assignedTo', e.target.value)}
+            options={employeeOptions}
+            value={formData.assignedToId}
+            onChange={(value) => handleChange('assignedToId', value)}
           />
         </div>
 
@@ -172,10 +206,9 @@ export function CreateTaskModal() {
           min={5}
           step={5}
           value={formData.estimatedDuration}
-          onChange={(e) => handleChange('estimatedDuration', parseInt(e.target.value))}
+          onChange={(e) => handleChange('estimatedDuration', parseInt(e.target.value) || 30)}
         />
       </div>
     </Modal>
   );
 }
-

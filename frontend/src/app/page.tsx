@@ -1,53 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardContent, Button } from '@/components/ui';
 import { StatCard, SuiteStatusChart, ActivityFeed, QuickTaskList } from '@/components/dashboard';
-import { useSuitesStore, useTasksStore, useEmployeesStore } from '@/lib/store';
+import { useSuitesStore, useTasksStore, useEmployeesStore, useAuthStore } from '@/lib/store';
 import { TaskStatus, TaskPriority, SuiteStatus, UITask } from '@/lib/types';
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   MOCK DATA (Replace with real data from stores)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-const mockActivities = [
-  {
-    id: '1',
-    type: 'task_completed' as const,
-    message: 'Cleaned Suite 204 - Deep cleaning completed',
-    user: { name: 'Maria Garcia' },
-    timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-  },
-  {
-    id: '2',
-    type: 'suite_cleaned' as const,
-    message: 'Suite 108 marked as Vacant Clean',
-    user: { name: 'John Smith' },
-    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-  },
-  {
-    id: '3',
-    type: 'employee_clocked_in' as const,
-    message: 'Started shift for the day',
-    user: { name: 'Sarah Johnson' },
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-  },
-  {
-    id: '4',
-    type: 'task_assigned' as const,
-    message: 'Maintenance task assigned for Suite 312',
-    user: { name: 'Admin' },
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-  },
-  {
-    id: '5',
-    type: 'note_created' as const,
-    message: 'Guest special request noted for Suite 405',
-    user: { name: 'Emily Davis' },
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-  },
-];
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DASHBOARD PAGE
@@ -55,23 +13,43 @@ const mockActivities = [
 
 export default function DashboardPage() {
   const router = useRouter();
+  const currentUser = useAuthStore((state) => state.currentUser);
   
   // Get data from stores
   const suitesItems = useSuitesStore((state) => state.items);
+  const suitesLoading = useSuitesStore((state) => state.isLoading);
+  const fetchAllSuites = useSuitesStore((state) => state.fetchAllSuites);
+  
   const tasksItems = useTasksStore((state) => state.items);
+  const tasksLoading = useTasksStore((state) => state.isLoading);
+  const fetchAllTasks = useTasksStore((state) => state.fetchAllTasks);
+  
   const employeesItems = useEmployeesStore((state) => state.items);
+  const employeesLoading = useEmployeesStore((state) => state.isLoading);
+  const fetchAllEmployees = useEmployeesStore((state) => state.fetchAllEmployees);
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchAllSuites();
+    fetchAllTasks();
+    fetchAllEmployees();
+  }, [fetchAllSuites, fetchAllTasks, fetchAllEmployees]);
+
+  const isLoading = suitesLoading || tasksLoading || employeesLoading;
 
   // Calculate suite statistics
   const suiteStats = useMemo(() => {
     const suitesArray = Object.values(suitesItems);
+    const total = suitesArray.length;
+    
     return {
-      total: suitesArray.length || 24, // Default for demo
-      vacantClean: suitesArray.filter(s => s.status === SuiteStatus.VACANT_CLEAN).length || 8,
-      vacantDirty: suitesArray.filter(s => s.status === SuiteStatus.VACANT_DIRTY).length || 4,
-      occupiedClean: suitesArray.filter(s => s.status === SuiteStatus.OCCUPIED_CLEAN).length || 6,
-      occupiedDirty: suitesArray.filter(s => s.status === SuiteStatus.OCCUPIED_DIRTY).length || 3,
-      outOfOrder: suitesArray.filter(s => s.status === SuiteStatus.OUT_OF_ORDER).length || 2,
-      blocked: suitesArray.filter(s => s.status === SuiteStatus.BLOCKED).length || 1,
+      total,
+      vacantClean: suitesArray.filter(s => s.status === SuiteStatus.VACANT_CLEAN).length,
+      vacantDirty: suitesArray.filter(s => s.status === SuiteStatus.VACANT_DIRTY).length,
+      occupiedClean: suitesArray.filter(s => s.status === SuiteStatus.OCCUPIED_CLEAN).length,
+      occupiedDirty: suitesArray.filter(s => s.status === SuiteStatus.OCCUPIED_DIRTY).length,
+      outOfOrder: suitesArray.filter(s => s.status === SuiteStatus.OUT_OF_ORDER).length,
+      blocked: suitesArray.filter(s => s.status === SuiteStatus.BLOCKED).length,
     };
   }, [suitesItems]);
 
@@ -79,45 +57,85 @@ export default function DashboardPage() {
   const taskStats = useMemo(() => {
     const tasksArray = Object.values(tasksItems);
     const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
     return {
-      total: tasksArray.length || 18,
-      pending: tasksArray.filter(t => t.status === TaskStatus.PENDING).length || 5,
-      inProgress: tasksArray.filter(t => t.status === TaskStatus.IN_PROGRESS).length || 7,
-      completed: tasksArray.filter(t => t.status === TaskStatus.COMPLETED).length || 4,
+      total: tasksArray.length,
+      pending: tasksArray.filter(t => t.status === TaskStatus.PENDING).length,
+      inProgress: tasksArray.filter(t => t.status === TaskStatus.IN_PROGRESS).length,
+      completed: tasksArray.filter(t => t.status === TaskStatus.COMPLETED).length,
+      completedToday: tasksArray.filter(t => 
+        t.status === TaskStatus.COMPLETED && 
+        t.completedAt && 
+        new Date(t.completedAt) >= todayStart
+      ).length,
       overdue: tasksArray.filter(t => 
         t.scheduledEnd && new Date(t.scheduledEnd) < now && 
         t.status !== TaskStatus.COMPLETED && t.status !== TaskStatus.CANCELLED
-      ).length || 2,
+      ).length,
     };
   }, [tasksItems]);
 
-  // Get urgent tasks - use empty array since stores are empty, UI shows mock data
+  // Get urgent tasks
   const urgentTasks: UITask[] = useMemo(() => {
-    // TODO: Replace with actual store data when API is connected
-    return [];
-  }, []);
+    const tasksArray = Object.values(tasksItems) as UITask[];
+    return tasksArray
+      .filter(t => 
+        (t.priority === TaskPriority.URGENT || t.priority === TaskPriority.EMERGENCY) &&
+        t.status !== TaskStatus.COMPLETED && 
+        t.status !== TaskStatus.CANCELLED
+      )
+      .slice(0, 5);
+  }, [tasksItems]);
 
-  // Get my active tasks - use empty array since stores are empty, UI shows mock data
+  // Get current user's active tasks
   const myTasks: UITask[] = useMemo(() => {
-    // TODO: Replace with actual store data when API is connected
-    return [];
-  }, []);
+    if (!currentUser?.id) return [];
+    const tasksArray = Object.values(tasksItems) as UITask[];
+    return tasksArray
+      .filter(t => 
+        t.assignedToId === currentUser.id &&
+        t.status !== TaskStatus.COMPLETED && 
+        t.status !== TaskStatus.CANCELLED
+      )
+      .slice(0, 5);
+  }, [tasksItems, currentUser?.id]);
 
   // Employee stats
   const employeeStats = useMemo(() => {
     const employeesArray = Object.values(employeesItems);
     return {
-      total: employeesArray.length || 12,
-      onDuty: employeesArray.filter(e => e.isOnDuty).length || 6,
+      total: employeesArray.length,
+      onDuty: employeesArray.filter(e => e.isOnDuty).length,
     };
   }, [employeesItems]);
+
+  // Build activity feed from recent tasks
+  const activities = useMemo(() => {
+    const tasksArray = Object.values(tasksItems);
+    return tasksArray
+      .filter(t => t.updatedAt)
+      .sort((a, b) => new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime())
+      .slice(0, 5)
+      .map(task => ({
+        id: task.id,
+        type: task.status === TaskStatus.COMPLETED ? 'task_completed' as const :
+              task.status === TaskStatus.ASSIGNED ? 'task_assigned' as const :
+              'suite_cleaned' as const,
+        message: `${task.title}${task.suiteNumber ? ` - Suite ${task.suiteNumber}` : ''}`,
+        user: { name: task.assignedTo || 'System' },
+        timestamp: task.updatedAt!,
+      }));
+  }, [tasksItems]);
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Welcome back!</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+            Welcome back{currentUser?.firstName ? `, ${currentUser.firstName}` : ''}!
+          </h1>
           <p className="text-[var(--text-secondary)] mt-1">
             Here&apos;s what&apos;s happening at your property today.
           </p>
@@ -133,6 +151,16 @@ export default function DashboardPage() {
           New Task
         </Button>
       </div>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-8">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 border-2 border-[var(--primary-600)] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[var(--text-secondary)]">Loading dashboard data...</span>
+          </div>
+        </div>
+      )}
 
       {/* Stats Grid - Suite Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -197,14 +225,14 @@ export default function DashboardPage() {
         />
         <StatCard
           title="Completed Today"
-          value={taskStats.completed}
+          value={taskStats.completedToday}
           icon={
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           }
           color="success"
-          trend={{ value: 12, isPositive: true }}
+          trend={taskStats.completedToday > 0 ? { value: taskStats.completedToday, isPositive: true } : undefined}
         />
         <StatCard
           title="Overdue"
@@ -297,7 +325,7 @@ export default function DashboardPage() {
               }
             />
             <CardContent>
-              <ActivityFeed activities={mockActivities} limit={5} />
+              <ActivityFeed activities={activities} limit={5} />
             </CardContent>
           </Card>
         </div>

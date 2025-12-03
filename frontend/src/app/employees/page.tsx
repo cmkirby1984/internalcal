@@ -1,155 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Select, Badge } from '@/components/ui';
+import { Button, Select } from '@/components/ui';
 import { EmployeeGrid } from '@/components/employees';
 import { useEmployeesStore, useUIStore } from '@/lib/store';
 import { UIEmployee, EmployeeRole, EmployeeStatus } from '@/lib/types';
 import { formatEnumValue } from '@/lib/utils';
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   MOCK DATA (Replace with real API calls)
-   ───────────────────────────────────────────────────────────────────────────── */
-
-const mockEmployees: UIEmployee[] = [
-  {
-    id: '1',
-    email: 'maria.garcia@motel.com',
-    fullName: 'Maria Garcia',
-    role: EmployeeRole.HOUSEKEEPER,
-    status: EmployeeStatus.ACTIVE,
-    phone: '555-0101',
-    avatar: null,
-    hireDate: '2022-03-15',
-    isOnDuty: true,
-    lastClockIn: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-    lastClockOut: null,
-    activeTasks: ['1', '2'],
-    permissions: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    email: 'john.smith@motel.com',
-    fullName: 'John Smith',
-    role: EmployeeRole.MAINTENANCE,
-    status: EmployeeStatus.ACTIVE,
-    phone: '555-0102',
-    avatar: null,
-    hireDate: '2021-06-20',
-    isOnDuty: true,
-    lastClockIn: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-    lastClockOut: null,
-    activeTasks: ['3'],
-    permissions: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    email: 'sarah.johnson@motel.com',
-    fullName: 'Sarah Johnson',
-    role: EmployeeRole.SUPERVISOR,
-    status: EmployeeStatus.ACTIVE,
-    phone: '555-0103',
-    avatar: null,
-    hireDate: '2020-01-10',
-    isOnDuty: true,
-    lastClockIn: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-    lastClockOut: null,
-    activeTasks: [],
-    permissions: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    email: 'mike.wilson@motel.com',
-    fullName: 'Mike Wilson',
-    role: EmployeeRole.MAINTENANCE,
-    status: EmployeeStatus.ACTIVE,
-    phone: '555-0104',
-    avatar: null,
-    hireDate: '2023-02-01',
-    isOnDuty: true,
-    lastClockIn: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    lastClockOut: null,
-    activeTasks: ['4'],
-    permissions: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '5',
-    email: 'emily.davis@motel.com',
-    fullName: 'Emily Davis',
-    role: EmployeeRole.HOUSEKEEPER,
-    status: EmployeeStatus.ON_BREAK,
-    phone: '555-0105',
-    avatar: null,
-    hireDate: '2022-08-15',
-    isOnDuty: true,
-    lastClockIn: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-    lastClockOut: null,
-    activeTasks: ['5'],
-    permissions: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '6',
-    email: 'david.brown@motel.com',
-    fullName: 'David Brown',
-    role: EmployeeRole.FRONT_DESK,
-    status: EmployeeStatus.OFF_DUTY,
-    phone: '555-0106',
-    avatar: null,
-    hireDate: '2021-11-20',
-    isOnDuty: false,
-    lastClockIn: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    lastClockOut: new Date(Date.now() - 1000 * 60 * 60 * 16).toISOString(),
-    activeTasks: [],
-    permissions: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '7',
-    email: 'lisa.martinez@motel.com',
-    fullName: 'Lisa Martinez',
-    role: EmployeeRole.MANAGER,
-    status: EmployeeStatus.ACTIVE,
-    phone: '555-0107',
-    avatar: null,
-    hireDate: '2019-05-01',
-    isOnDuty: true,
-    lastClockIn: new Date(Date.now() - 1000 * 60 * 60 * 7).toISOString(),
-    lastClockOut: null,
-    activeTasks: [],
-    permissions: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: '8',
-    email: 'james.taylor@motel.com',
-    fullName: 'James Taylor',
-    role: EmployeeRole.HOUSEKEEPER,
-    status: EmployeeStatus.ON_LEAVE,
-    phone: '555-0108',
-    avatar: null,
-    hireDate: '2022-04-10',
-    isOnDuty: false,
-    lastClockIn: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-    lastClockOut: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3 + 1000 * 60 * 60 * 8).toISOString(),
-    activeTasks: [],
-    permissions: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 /* ─────────────────────────────────────────────────────────────────────────────
    EMPLOYEES PAGE
@@ -159,6 +16,11 @@ export default function EmployeesPage() {
   const router = useRouter();
   const openModal = useUIStore((state) => state.openModal);
   
+  // Store state
+  const employeesMap = useEmployeesStore((state) => state.items);
+  const isLoading = useEmployeesStore((state) => state.isLoading);
+  const fetchAllEmployees = useEmployeesStore((state) => state.fetchAllEmployees);
+
   // Local state
   const [filters, setFilters] = useState<{
     role?: EmployeeRole;
@@ -166,9 +28,20 @@ export default function EmployeesPage() {
     onDuty?: boolean;
   }>({});
 
-  // Use mock data for now
-  const employees = mockEmployees;
-  const isLoading = false;
+  // Fetch data on mount
+  useEffect(() => {
+    fetchAllEmployees();
+  }, [fetchAllEmployees]);
+
+  // Convert map to array
+  const employees = useMemo(() => {
+    return Object.values(employeesMap).map(emp => ({
+      ...emp,
+      fullName: `${emp.firstName} ${emp.lastName}`,
+      activeTasks: [],
+      permissions: emp.permissions || [],
+    })) as UIEmployee[];
+  }, [employeesMap]);
 
   // Filter employees
   const filteredEmployees = useMemo(() => {
@@ -319,4 +192,3 @@ export default function EmployeesPage() {
     </div>
   );
 }
-

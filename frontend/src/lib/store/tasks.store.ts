@@ -8,10 +8,11 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { TasksStore, TaskFilters } from '../types/state';
 import type { Task } from '../types/entities';
-import { TaskStatus, TaskPriority, TaskViewMode, SuiteStatus } from '../types/enums';
+import { TaskStatus, TaskPriority, TaskViewMode, SuiteStatus, SyncOperation } from '../types/enums';
 import { tasksApi } from '../api/endpoints';
 import { useUIStore } from './ui.store';
 import { useAuthStore } from './auth.store';
+import { useSyncStore } from './sync.store';
 
 const initialFilters: TaskFilters = {
   status: null,
@@ -115,6 +116,38 @@ export const useTasksStore = create<TasksStore>()(
             throw new Error('Title and type are required');
           }
 
+          const { isOnline, addPendingChange } = useSyncStore.getState();
+
+          // If offline, queue the change
+          if (!isOnline) {
+            const tempId = `temp-${Date.now()}`;
+            const tempTask = {
+              ...taskData,
+              id: tempId,
+              status: taskData.assignedToId ? TaskStatus.ASSIGNED : TaskStatus.PENDING,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            } as Task;
+
+            get().addTask(tempTask);
+            get().updateTaskGroupings();
+
+            addPendingChange({
+              entityType: 'task',
+              entityId: tempId,
+              operation: SyncOperation.CREATE,
+              data: taskData as Record<string, unknown>,
+            });
+
+            useUIStore.getState().showToast({
+              type: 'INFO',
+              message: 'Task saved offline. Will sync when connected.',
+              duration: 3000,
+            });
+
+            return tempTask;
+          }
+
           const newTask = await tasksApi.create(taskData);
           get().addTask(newTask);
           get().updateTaskGroupings();
@@ -139,6 +172,20 @@ export const useTasksStore = create<TasksStore>()(
       updateTask: async (taskId: string, updates: Partial<Task>) => {
         const originalTask = get().items[taskId];
         get().updateTaskLocal(taskId, updates);
+
+        const { isOnline, addPendingChange } = useSyncStore.getState();
+
+        // If offline, queue the change
+        if (!isOnline) {
+          addPendingChange({
+            entityType: 'task',
+            entityId: taskId,
+            operation: SyncOperation.UPDATE,
+            data: updates as Record<string, unknown>,
+          });
+          get().updateTaskGroupings();
+          return;
+        }
 
         try {
           const updatedTask = await tasksApi.update(taskId, updates);
@@ -168,6 +215,28 @@ export const useTasksStore = create<TasksStore>()(
       },
 
       deleteTask: async (taskId: string) => {
+        const { isOnline, addPendingChange } = useSyncStore.getState();
+
+        // If offline, queue the change
+        if (!isOnline) {
+          get().removeTask(taskId);
+          get().updateTaskGroupings();
+
+          addPendingChange({
+            entityType: 'task',
+            entityId: taskId,
+            operation: SyncOperation.DELETE,
+            data: {},
+          });
+
+          useUIStore.getState().showToast({
+            type: 'INFO',
+            message: 'Task deleted offline. Will sync when connected.',
+            duration: 3000,
+          });
+          return;
+        }
+
         try {
           await tasksApi.delete(taskId);
           get().removeTask(taskId);

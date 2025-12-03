@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Modal, Button, Input, Select } from '@/components/ui';
-import { useUIStore } from '@/lib/store';
-import { EmployeeRole, Department, ShiftType } from '@/lib/types';
+import { useUIStore, useEmployeesStore } from '@/lib/store';
+import { EmployeeRole, Department } from '@/lib/types';
 import { formatEnumValue } from '@/lib/utils';
 
 const roleOptions = Object.values(EmployeeRole).map(role => ({
@@ -16,15 +16,10 @@ const departmentOptions = Object.values(Department).map(dept => ({
   label: formatEnumValue(dept),
 }));
 
-const shiftOptions = Object.values(ShiftType).map(shift => ({
-  value: shift,
-  label: formatEnumValue(shift),
-}));
-
 export function CreateEmployeeModal() {
   const activeModal = useUIStore((state) => state.activeModal);
   const closeModal = useUIStore((state) => state.closeModal);
-  const showToast = useUIStore((state) => state.showToast);
+  const createEmployee = useEmployeesStore((state) => state.createEmployee);
 
   const isOpen = activeModal === 'create-employee';
 
@@ -33,9 +28,10 @@ export function CreateEmployeeModal() {
     lastName: '',
     email: '',
     phone: '',
+    username: '',
+    password: '',
     role: EmployeeRole.HOUSEKEEPER,
     department: Department.HOUSEKEEPING,
-    shift: ShiftType.DAY,
     hireDate: new Date().toISOString().split('T')[0],
   });
 
@@ -70,6 +66,16 @@ export function CreateEmployeeModal() {
       newErrors.email = 'Invalid email format';
     }
 
+    if (!formData.username.trim()) {
+      newErrors.username = 'Username is required';
+    }
+
+    if (!formData.password.trim()) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -80,10 +86,18 @@ export function CreateEmployeeModal() {
     setIsSubmitting(true);
     
     try {
-      // TODO: Call API to create employee
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await createEmployee({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        username: formData.username,
+        password: formData.password,
+        role: formData.role,
+        department: formData.department,
+        hireDate: formData.hireDate,
+      });
       
-      showToast({ type: 'SUCCESS', message: 'Employee added successfully' });
       closeModal();
       
       // Reset form
@@ -92,13 +106,14 @@ export function CreateEmployeeModal() {
         lastName: '',
         email: '',
         phone: '',
+        username: '',
+        password: '',
         role: EmployeeRole.HOUSEKEEPER,
         department: Department.HOUSEKEEPING,
-        shift: ShiftType.DAY,
         hireDate: new Date().toISOString().split('T')[0],
       });
     } catch (error) {
-      showToast({ type: 'ERROR', message: 'Failed to add employee' });
+      // Error handling is done in the store
     } finally {
       setIsSubmitting(false);
     }
@@ -168,6 +183,27 @@ export function CreateEmployeeModal() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="Username"
+            required
+            placeholder="Enter username"
+            value={formData.username}
+            onChange={(e) => handleChange('username', e.target.value)}
+            error={errors.username}
+          />
+          
+          <Input
+            label="Password"
+            required
+            type="password"
+            placeholder="Enter password"
+            value={formData.password}
+            onChange={(e) => handleChange('password', e.target.value)}
+            error={errors.password}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <Select
             label="Role"
             required
@@ -185,23 +221,13 @@ export function CreateEmployeeModal() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Select
-            label="Default Shift"
-            options={shiftOptions}
-            value={formData.shift}
-            onChange={(value) => handleChange('shift', value)}
-          />
-          
-          <Input
-            label="Hire Date"
-            type="date"
-            value={formData.hireDate}
-            onChange={(e) => handleChange('hireDate', e.target.value)}
-          />
-        </div>
+        <Input
+          label="Hire Date"
+          type="date"
+          value={formData.hireDate}
+          onChange={(e) => handleChange('hireDate', e.target.value)}
+        />
       </div>
     </Modal>
   );
 }
-
