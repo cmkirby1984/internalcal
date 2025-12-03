@@ -88,7 +88,7 @@ export class RealtimeEventListener {
         status: event.newStatus,
         previousStatus: event.previousStatus,
       },
-      event.changedById || 'system',
+      event.changedBy || 'system',
     );
   }
 }

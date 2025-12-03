@@ -83,7 +83,7 @@ export class RealtimeGateway
       if (!this.userConnections.has(payload.sub)) {
         this.userConnections.set(payload.sub, new Set());
       }
-      this.userConnections.get(payload.sub).add(client.id);
+      this.userConnections.get(payload.sub)!.add(client.id);
       this.socketToUser.set(client.id, payload.sub);
 
       // Join default rooms
