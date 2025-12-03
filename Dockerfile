@@ -4,20 +4,16 @@
 # Build stage
 FROM node:20-alpine AS builder
 
-WORKDIR /app/backend
+WORKDIR /app
 
-# Copy backend package files
-COPY backend/package*.json ./
-COPY backend/prisma ./prisma/
+# Copy entire backend directory
+COPY ./backend ./
 
 # Install dependencies
 RUN npm ci
 
 # Generate Prisma client
 RUN npx prisma generate
-
-# Copy backend source code
-COPY backend/ ./
 
 # Build the application
 RUN npm run build
@@ -32,17 +28,17 @@ RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
 # Copy package files
-COPY backend/package*.json ./
+COPY ./backend/package*.json ./
 
 # Install production dependencies only
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy Prisma files
-COPY backend/prisma ./prisma
-COPY --from=builder /app/backend/node_modules/.prisma ./node_modules/.prisma
+# Copy Prisma files and generated client from builder
+COPY ./backend/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Copy built application
-COPY --from=builder /app/backend/dist ./dist
+COPY --from=builder /app/dist ./dist
 
 # Set ownership
 RUN chown -R nestjs:nodejs /app
