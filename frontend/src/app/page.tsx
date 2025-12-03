@@ -76,30 +76,58 @@ export default function DashboardPage() {
     };
   }, [tasksItems]);
 
+  // Helper to convert Task to UITask
+  const taskToUITask = (task: typeof tasksItems[string]): UITask => {
+    const assignedEmployee = task.assignedToId ? employeesItems[task.assignedToId] : null;
+    const creatorEmployee = task.assignedById ? employeesItems[task.assignedById] : null;
+    
+    return {
+      id: task.id,
+      type: task.type,
+      priority: task.priority,
+      status: task.status,
+      title: task.title,
+      description: task.description,
+      suiteId: task.suiteId,
+      assignedTo: assignedEmployee ? `${assignedEmployee.firstName} ${assignedEmployee.lastName}` : null,
+      createdBy: creatorEmployee ? `${creatorEmployee.firstName} ${creatorEmployee.lastName}` : 'System',
+      scheduledStart: task.scheduledStart,
+      scheduledEnd: task.scheduledEnd,
+      estimatedDuration: task.estimatedDuration,
+      actualDuration: task.actualDuration,
+      notes: [],
+      checklist: [],
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+    };
+  };
+
   // Get urgent tasks
   const urgentTasks: UITask[] = useMemo(() => {
-    const tasksArray = Object.values(tasksItems) as UITask[];
+    const tasksArray = Object.values(tasksItems);
     return tasksArray
       .filter(t => 
         (t.priority === TaskPriority.URGENT || t.priority === TaskPriority.EMERGENCY) &&
         t.status !== TaskStatus.COMPLETED && 
         t.status !== TaskStatus.CANCELLED
       )
-      .slice(0, 5);
-  }, [tasksItems]);
+      .slice(0, 5)
+      .map(taskToUITask);
+  }, [tasksItems, employeesItems]);
 
   // Get current user's active tasks
   const myTasks: UITask[] = useMemo(() => {
     if (!currentUser?.id) return [];
-    const tasksArray = Object.values(tasksItems) as UITask[];
+    const tasksArray = Object.values(tasksItems);
     return tasksArray
       .filter(t => 
         t.assignedToId === currentUser.id &&
         t.status !== TaskStatus.COMPLETED && 
         t.status !== TaskStatus.CANCELLED
       )
-      .slice(0, 5);
-  }, [tasksItems, currentUser?.id]);
+      .slice(0, 5)
+      .map(taskToUITask);
+  }, [tasksItems, currentUser?.id, employeesItems]);
 
   // Employee stats
   const employeeStats = useMemo(() => {
@@ -117,16 +145,28 @@ export default function DashboardPage() {
       .filter(t => t.updatedAt)
       .sort((a, b) => new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime())
       .slice(0, 5)
-      .map(task => ({
-        id: task.id,
-        type: task.status === TaskStatus.COMPLETED ? 'task_completed' as const :
-              task.status === TaskStatus.ASSIGNED ? 'task_assigned' as const :
-              'suite_cleaned' as const,
-        message: `${task.title}${task.suiteNumber ? ` - Suite ${task.suiteNumber}` : ''}`,
-        user: { name: task.assignedTo || 'System' },
-        timestamp: task.updatedAt!,
-      }));
-  }, [tasksItems]);
+      .map(task => {
+        // Look up employee name from assignedToId
+        const assignedEmployee = task.assignedToId ? employeesItems[task.assignedToId] : null;
+        const assignedName = assignedEmployee 
+          ? `${assignedEmployee.firstName} ${assignedEmployee.lastName}`
+          : 'System';
+        
+        // Look up suite number from suiteId
+        const suite = task.suiteId ? Object.values(suitesItems).find(s => s.id === task.suiteId) : null;
+        const suiteNumber = suite?.suiteNumber;
+
+        return {
+          id: task.id,
+          type: task.status === TaskStatus.COMPLETED ? 'task_completed' as const :
+                task.status === TaskStatus.ASSIGNED ? 'task_assigned' as const :
+                'suite_cleaned' as const,
+          message: `${task.title}${suiteNumber ? ` - Suite ${suiteNumber}` : ''}`,
+          user: { name: assignedName },
+          timestamp: task.updatedAt!,
+        };
+      });
+  }, [tasksItems, employeesItems, suitesItems]);
 
   return (
     <div className="space-y-6">
