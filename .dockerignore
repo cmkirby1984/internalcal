@@ -1,0 +1,43 @@
+# Frontend files (not needed for backend deployment)
+frontend/
+
+# Node modules (will be installed during build)
+**/node_modules/
+**/.next/
+**/dist/
+
+# Development files
+**/.git/
+**/.github/
+**/.vscode/
+**/.claude/
+
+# Environment files
+**/.env
+**/.env.*
+!**/.env.example
+
+# Documentation
+docs/
+*.md
+!backend/README.md
+
+# Test files
+**/test/
+**/tests/
+**/*.test.ts
+**/*.spec.ts
+**/coverage/
+
+# Build artifacts
+**/dist/
+**/.next/
+
+# Logs
+**/logs/
+**/*.log
+**/npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
