@@ -1,8 +1,9 @@
 # Root-level Dockerfile for Railway deployment
 # Builds the backend service from the backend/ directory
+# Using Debian-based image for Prisma compatibility
 
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
@@ -19,13 +20,20 @@ RUN npx prisma generate
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
+
+# Install OpenSSL and other dependencies needed for Prisma
+RUN apt-get update && apt-get install -y \
+    openssl \
+    ca-certificates \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nestjs -u 1001
+RUN groupadd -g 1001 nodejs && \
+    useradd -u 1001 -g nodejs -s /bin/bash nestjs
 
 # Copy package files
 COPY ./backend/package*.json ./
