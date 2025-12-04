@@ -13,7 +13,7 @@ export class EmployeesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createEmployeeDto: CreateEmployeeDto) {
-    const { password, ...rest } = createEmployeeDto;
+    const { password, hireDate, ...rest } = createEmployeeDto;
 
     // Hash password
     const passwordHash = await argon2.hash(password);
@@ -23,6 +23,7 @@ export class EmployeesService {
         data: {
           ...rest,
           passwordHash,
+          hireDate: new Date(hireDate),
           permissions: rest.permissions ?? this.getDefaultPermissions(rest.role),
         },
         select: this.getSelectFields(),
