@@ -17,6 +17,7 @@ import { LoggingInterceptor } from './common/interceptors';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { SetupController } from './setup.controller';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { AppService } from './app.service';
     RealtimeModule,
     HealthModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, SetupController],
   providers: [
     AppService,
     {
