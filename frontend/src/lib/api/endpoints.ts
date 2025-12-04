@@ -45,8 +45,10 @@ export interface SuitesQueryParams {
 }
 
 export const suitesApi = {
-  getAll: (params?: SuitesQueryParams): Promise<Suite[]> =>
-    api.get<Suite[]>('/suites', params),
+  getAll: async (params?: SuitesQueryParams): Promise<Suite[]> => {
+    const response = await api.get<{ data: Suite[]; meta: any }>('/suites', params);
+    return response.data;
+  },
 
   getById: (id: string): Promise<Suite> =>
     api.get<Suite>(`/suites/${id}`),
@@ -79,17 +81,23 @@ export interface TasksQueryParams {
 }
 
 export const tasksApi = {
-  getAll: (params?: TasksQueryParams): Promise<Task[]> =>
-    api.get<Task[]>('/tasks', params),
+  getAll: async (params?: TasksQueryParams): Promise<Task[]> => {
+    const response = await api.get<{ data: Task[]; meta: any }>('/tasks', params);
+    return response.data;
+  },
 
   getById: (id: string): Promise<Task> =>
     api.get<Task>(`/tasks/${id}`),
 
-  getBySuite: (suiteId: string): Promise<Task[]> =>
-    api.get<Task[]>('/tasks', { suiteId }),
+  getBySuite: async (suiteId: string): Promise<Task[]> => {
+    const response = await api.get<{ data: Task[]; meta: any }>('/tasks', { suiteId });
+    return response.data;
+  },
 
-  getByEmployee: (employeeId: string): Promise<Task[]> =>
-    api.get<Task[]>('/tasks', { assignedTo: employeeId }),
+  getByEmployee: async (employeeId: string): Promise<Task[]> => {
+    const response = await api.get<{ data: Task[]; meta: any }>('/tasks', { assignedTo: employeeId });
+    return response.data;
+  },
 
   create: (data: Partial<Task>): Promise<Task> =>
     api.post<Task>('/tasks', data),
@@ -119,14 +127,18 @@ export interface EmployeesQueryParams {
 }
 
 export const employeesApi = {
-  getAll: (params?: EmployeesQueryParams): Promise<Employee[]> =>
-    api.get<Employee[]>('/employees', params),
+  getAll: async (params?: EmployeesQueryParams): Promise<Employee[]> => {
+    const response = await api.get<{ data: Employee[]; meta: any }>('/employees', params);
+    return response.data;
+  },
 
   getById: (id: string): Promise<Employee> =>
     api.get<Employee>(`/employees/${id}`),
 
-  getOnDuty: (): Promise<Employee[]> =>
-    api.get<Employee[]>('/employees', { isOnDuty: true }),
+  getOnDuty: async (): Promise<Employee[]> => {
+    const response = await api.get<{ data: Employee[]; meta: any }>('/employees', { isOnDuty: true });
+    return response.data;
+  },
 
   create: (data: Partial<Employee>): Promise<Employee> =>
     api.post<Employee>('/employees', data),
@@ -159,17 +171,23 @@ export interface NotesQueryParams {
 }
 
 export const notesApi = {
-  getAll: (params?: NotesQueryParams): Promise<Note[]> =>
-    api.get<Note[]>('/notes', params),
+  getAll: async (params?: NotesQueryParams): Promise<Note[]> => {
+    const response = await api.get<{ data: Note[]; meta: any }>('/notes', params);
+    return response.data;
+  },
 
   getById: (id: string): Promise<Note> =>
     api.get<Note>(`/notes/${id}`),
 
-  getBySuite: (suiteId: string): Promise<Note[]> =>
-    api.get<Note[]>('/notes', { relatedSuiteId: suiteId }),
+  getBySuite: async (suiteId: string): Promise<Note[]> => {
+    const response = await api.get<{ data: Note[]; meta: any }>('/notes', { relatedSuiteId: suiteId });
+    return response.data;
+  },
 
-  getByTask: (taskId: string): Promise<Note[]> =>
-    api.get<Note[]>('/notes', { relatedTaskId: taskId }),
+  getByTask: async (taskId: string): Promise<Note[]> => {
+    const response = await api.get<{ data: Note[]; meta: any }>('/notes', { relatedTaskId: taskId });
+    return response.data;
+  },
 
   create: (data: Partial<Note>): Promise<Note> =>
     api.post<Note>('/notes', data),
