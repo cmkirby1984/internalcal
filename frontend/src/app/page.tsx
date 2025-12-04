@@ -194,12 +194,17 @@ export default function DashboardPage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="flex items-center justify-center py-8">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 border-2 border-[var(--primary-600)] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[var(--text-secondary)]">Loading dashboard data...</span>
+        <Card padding="lg">
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-12 h-12 border-4 border-[var(--primary-600)] border-t-transparent rounded-full animate-spin mb-4" />
+            <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
+              Please Wait
+            </h2>
+            <p className="text-[var(--text-secondary)]">
+              Loading dashboard data...
+            </p>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Stats Grid - Suite Stats */}
