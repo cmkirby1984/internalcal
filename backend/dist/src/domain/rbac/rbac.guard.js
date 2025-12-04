@@ -40,7 +40,10 @@ let RbacGuard = class RbacGuard {
         if (!requiredPermissions || requiredPermissions.length === 0) {
             return true;
         }
-        const mode = this.reflector.getAllAndOverride(exports.PERMISSIONS_MODE_KEY, [context.getHandler(), context.getClass()]) || 'any';
+        const mode = this.reflector.getAllAndOverride(exports.PERMISSIONS_MODE_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]) || 'any';
         const request = context.switchToHttp().getRequest();
         const user = request.user;
         if (!user) {

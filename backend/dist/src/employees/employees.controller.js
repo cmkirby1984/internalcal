@@ -61,7 +61,10 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new employee' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Employee created successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 409, description: 'Email/username/employee number already exists' }),
+    (0, swagger_1.ApiResponse)({
+        status: 409,
+        description: 'Email/username/employee number already exists',
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [dto_1.CreateEmployeeDto]),
@@ -94,7 +97,9 @@ __decorate([
 ], EmployeesController.prototype, "getOnDuty", null);
 __decorate([
     (0, common_1.Get)('available'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all available employees (on duty, no active tasks)' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get all available employees (on duty, no active tasks)',
+    }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of available employees' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

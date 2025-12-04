@@ -5,7 +5,11 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { hasPermission, hasAnyPermission, hasAllPermissions } from './permissions';
+import {
+  hasPermission,
+  hasAnyPermission,
+  hasAllPermissions,
+} from './permissions';
 
 export const PERMISSIONS_KEY = 'permissions';
 export const PERMISSIONS_MODE_KEY = 'permissions_mode';
@@ -52,10 +56,11 @@ export class RbacGuard implements CanActivate {
       return true;
     }
 
-    const mode = this.reflector.getAllAndOverride<PermissionsMode>(
-      PERMISSIONS_MODE_KEY,
-      [context.getHandler(), context.getClass()],
-    ) || 'any';
+    const mode =
+      this.reflector.getAllAndOverride<PermissionsMode>(PERMISSIONS_MODE_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) || 'any';
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
@@ -135,4 +140,3 @@ export class RolesGuard implements CanActivate {
     return true;
   }
 }
-

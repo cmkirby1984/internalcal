@@ -8,4 +8,3 @@ import { SuitesController } from './suites.controller';
   exports: [SuitesService],
 })
 export class SuitesModule {}
-

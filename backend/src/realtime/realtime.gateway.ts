@@ -154,7 +154,9 @@ export class RealtimeGateway
     @MessageBody() data: { suiteId: string },
   ) {
     client.join(`suite:${data.suiteId}`);
-    this.logger.debug(`Client ${client.id} subscribed to suite:${data.suiteId}`);
+    this.logger.debug(
+      `Client ${client.id} subscribed to suite:${data.suiteId}`,
+    );
     return { event: 'subscribed', data: { room: `suite:${data.suiteId}` } };
   }
 
@@ -164,7 +166,9 @@ export class RealtimeGateway
     @MessageBody() data: { suiteId: string },
   ) {
     client.leave(`suite:${data.suiteId}`);
-    this.logger.debug(`Client ${client.id} unsubscribed from suite:${data.suiteId}`);
+    this.logger.debug(
+      `Client ${client.id} unsubscribed from suite:${data.suiteId}`,
+    );
     return { event: 'unsubscribed', data: { room: `suite:${data.suiteId}` } };
   }
 
@@ -201,7 +205,11 @@ export class RealtimeGateway
   /**
    * Broadcast to a specific department
    */
-  broadcastToDepartment(department: string, event: string, payload: BroadcastPayload) {
+  broadcastToDepartment(
+    department: string,
+    event: string,
+    payload: BroadcastPayload,
+  ) {
     this.server.to(`department:${department}`).emit(event, payload);
     this.logger.debug(`Broadcast to department:${department}: ${event}`);
   }
@@ -430,4 +438,3 @@ export class RealtimeGateway
     return this.userConnections.has(userId);
   }
 }
-

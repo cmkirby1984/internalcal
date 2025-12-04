@@ -40,4 +40,3 @@ export class FilterSuitesDto extends PaginationDto {
   @IsEnum(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc';
 }
-

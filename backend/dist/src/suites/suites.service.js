@@ -121,7 +121,9 @@ let SuitesService = SuitesService_1 = class SuitesService {
                 where: { id },
                 data: {
                     ...rest,
-                    ...(currentGuest !== undefined && { currentGuest: currentGuest }),
+                    ...(currentGuest !== undefined && {
+                        currentGuest: currentGuest,
+                    }),
                 },
             });
         }

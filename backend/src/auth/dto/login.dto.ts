@@ -12,9 +12,18 @@ export class LoginDto {
   password: string;
 }
 
+export class RefreshTokenDto {
+  @ApiProperty({ description: 'Refresh token received from login' })
+  @IsString()
+  refreshToken: string;
+}
+
 export class LoginResponseDto {
   @ApiProperty()
   token: string;
+
+  @ApiProperty()
+  refreshToken: string;
 
   @ApiProperty()
   user: {
@@ -27,4 +36,3 @@ export class LoginResponseDto {
     permissions: string[];
   };
 }
-

@@ -1,4 +1,9 @@
-import { SuiteStatus, TaskStatus, TaskType, TaskPriority } from '@prisma/client';
+import {
+  SuiteStatus,
+  TaskStatus,
+  TaskType,
+  TaskPriority,
+} from '@prisma/client';
 
 /**
  * Domain Events
@@ -260,4 +265,3 @@ export const DomainEventNames = {
   NOTE_INCIDENT_CREATED: IncidentNoteCreatedEvent.eventName,
   NOTE_FOLLOWUP_DUE: NoteFollowUpDueEvent.eventName,
 } as const;
-

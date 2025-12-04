@@ -89,4 +89,3 @@ export class CreateTaskDto {
   @IsString({ each: true })
   attachedPhotos?: string[];
 }
-

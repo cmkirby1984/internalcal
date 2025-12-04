@@ -4,7 +4,11 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { CreateEmployeeDto, UpdateEmployeeDto, FilterEmployeesDto } from './dto';
+import {
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+  FilterEmployeesDto,
+} from './dto';
 import { Prisma } from '@prisma/client';
 import * as argon2 from 'argon2';
 
@@ -24,7 +28,8 @@ export class EmployeesService {
           ...rest,
           passwordHash,
           hireDate: new Date(hireDate),
-          permissions: rest.permissions ?? this.getDefaultPermissions(rest.role),
+          permissions:
+            rest.permissions ?? this.getDefaultPermissions(rest.role),
         },
         select: this.getSelectFields(),
       });
@@ -110,7 +115,15 @@ export class EmployeesService {
   }
 
   async findAll(filters: FilterEmployeesDto) {
-    const { page = 1, limit = 20, status, role, department, isOnDuty, search } = filters;
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      role,
+      department,
+      isOnDuty,
+      search,
+    } = filters;
     const skip = (page - 1) * limit;
 
     const where: Prisma.EmployeeWhereInput = {};
@@ -312,4 +325,3 @@ export class EmployeesService {
     };
   }
 }
-

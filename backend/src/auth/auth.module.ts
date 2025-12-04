@@ -16,7 +16,8 @@ import { EmployeesModule } from '../employees/employees.module';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET') || 'dev-secret-key',
         signOptions: {
-          expiresIn: (configService.get<string>('JWT_EXPIRES_IN') || '24h') as any,
+          expiresIn: (configService.get<string>('JWT_EXPIRES_IN') ||
+            '24h') as any,
         },
       }),
       inject: [ConfigService],
@@ -27,4 +28,3 @@ import { EmployeesModule } from '../employees/employees.module';
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
-

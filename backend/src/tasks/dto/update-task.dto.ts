@@ -24,4 +24,3 @@ export class UpdateTaskDto extends PartialType(CreateTaskDto) {
   @IsDateString()
   actualEnd?: string;
 }
-

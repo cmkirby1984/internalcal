@@ -122,4 +122,3 @@ export function hasAllPermissions(
 export function getDefaultPermissions(role: string): string[] {
   return RolePermissions[role]?.map(String) || [];
 }
-

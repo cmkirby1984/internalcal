@@ -2,8 +2,12 @@ export declare class LoginDto {
     username: string;
     password: string;
 }
+export declare class RefreshTokenDto {
+    refreshToken: string;
+}
 export declare class LoginResponseDto {
-    access_token: string;
+    token: string;
+    refreshToken: string;
     user: {
         id: string;
         username: string;

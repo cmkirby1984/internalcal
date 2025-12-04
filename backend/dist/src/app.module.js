@@ -19,8 +19,12 @@ const tasks_1 = require("./tasks");
 const employees_1 = require("./employees");
 const notes_1 = require("./notes");
 const notifications_1 = require("./notifications");
+const realtime_1 = require("./realtime");
+const health_1 = require("./health");
+const interceptors_1 = require("./common/interceptors");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
+const setup_controller_1 = require("./setup.controller");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,8 +43,10 @@ exports.AppModule = AppModule = __decorate([
             employees_1.EmployeesModule,
             notes_1.NotesModule,
             notifications_1.NotificationsModule,
+            realtime_1.RealtimeModule,
+            health_1.HealthModule,
         ],
-        controllers: [app_controller_1.AppController],
+        controllers: [app_controller_1.AppController, setup_controller_1.SetupController],
         providers: [
             app_service_1.AppService,
             {
@@ -52,6 +58,14 @@ exports.AppModule = AppModule = __decorate([
                         enableImplicitConversion: true,
                     },
                 }),
+            },
+            {
+                provide: core_1.APP_INTERCEPTOR,
+                useClass: interceptors_1.LoggingInterceptor,
+            },
+            {
+                provide: core_1.APP_GUARD,
+                useClass: auth_1.JwtAuthGuard,
             },
         ],
     })

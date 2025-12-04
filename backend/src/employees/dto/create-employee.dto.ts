@@ -87,4 +87,3 @@ export class CreateEmployeeDto {
   @IsDateString()
   hireDate: string;
 }
-

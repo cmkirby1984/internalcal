@@ -41,7 +41,10 @@ export class HealthController {
 
     const [database, websocket, memory] = checks;
 
-    const allUp = database.status === 'up' && websocket.status === 'up' && memory.status === 'up';
+    const allUp =
+      database.status === 'up' &&
+      websocket.status === 'up' &&
+      memory.status === 'up';
     const anyDown = database.status === 'down' || websocket.status === 'down';
 
     return {
@@ -111,7 +114,9 @@ export class HealthController {
     const memUsage = process.memoryUsage();
     const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
     const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
-    const usagePercent = Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100);
+    const usagePercent = Math.round(
+      (memUsage.heapUsed / memUsage.heapTotal) * 100,
+    );
 
     return {
       status: usagePercent > 90 ? 'down' : 'up',
@@ -124,4 +129,3 @@ export class HealthController {
     };
   }
 }
-

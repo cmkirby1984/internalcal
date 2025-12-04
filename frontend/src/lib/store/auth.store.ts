@@ -37,6 +37,9 @@ export const useAuthStore = create<AuthStore>()(
             const response = await authApi.login({ username, password });
 
             tokenStorage.setToken(response.token);
+            if (response.refreshToken) {
+              tokenStorage.setRefreshToken(response.refreshToken);
+            }
 
             set((state) => {
               state.currentUser = response.user;

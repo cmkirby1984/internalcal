@@ -46,7 +46,8 @@ export class SetupController {
       message: 'Admin user created successfully!',
       username: admin.username,
       password: 'admin123',
-      instructions: 'You can now login with username: admin, password: admin123',
+      instructions:
+        'You can now login with username: admin, password: admin123',
     };
   }
 }

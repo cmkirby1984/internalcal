@@ -20,6 +20,18 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const TOKEN_KEY = 'auth_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 
+// Cookie utilities for middleware auth checks
+const setCookie = (name: string, value: string, days: number = 7): void => {
+  if (typeof document === 'undefined') return;
+  const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+  document.cookie = `${name}=${value}; expires=${expires}; path=/; SameSite=Lax`;
+};
+
+const removeCookie = (name: string): void => {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
 // Token storage utilities
 export const tokenStorage = {
   getToken: (): string | null => {
@@ -30,11 +42,14 @@ export const tokenStorage = {
   setToken: (token: string): void => {
     if (typeof window === 'undefined') return;
     localStorage.setItem(TOKEN_KEY, token);
+    // Also set cookie for middleware auth checks
+    setCookie(TOKEN_KEY, token, 1); // 1 day for access token
   },
   
   removeToken: (): void => {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(TOKEN_KEY);
+    removeCookie(TOKEN_KEY);
   },
   
   getRefreshToken: (): string | null => {

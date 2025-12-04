@@ -53,13 +53,14 @@ let EmployeesService = class EmployeesService {
         this.prisma = prisma;
     }
     async create(createEmployeeDto) {
-        const { password, ...rest } = createEmployeeDto;
+        const { password, hireDate, ...rest } = createEmployeeDto;
         const passwordHash = await argon2.hash(password);
         try {
             const employee = await this.prisma.employee.create({
                 data: {
                     ...rest,
                     passwordHash,
+                    hireDate: new Date(hireDate),
                     permissions: rest.permissions ?? this.getDefaultPermissions(rest.role),
                 },
                 select: this.getSelectFields(),
@@ -140,7 +141,7 @@ let EmployeesService = class EmployeesService {
         };
     }
     async findAll(filters) {
-        const { page = 1, limit = 20, status, role, department, isOnDuty, search } = filters;
+        const { page = 1, limit = 20, status, role, department, isOnDuty, search, } = filters;
         const skip = (page - 1) * limit;
         const where = {};
         if (status)

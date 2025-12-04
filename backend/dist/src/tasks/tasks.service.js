@@ -106,8 +106,12 @@ let TasksService = TasksService_1 = class TasksService {
                     orderBy,
                     include: {
                         suite: { select: { id: true, suiteNumber: true } },
-                        assignedTo: { select: { id: true, firstName: true, lastName: true } },
-                        assignedBy: { select: { id: true, firstName: true, lastName: true } },
+                        assignedTo: {
+                            select: { id: true, firstName: true, lastName: true },
+                        },
+                        assignedBy: {
+                            select: { id: true, firstName: true, lastName: true },
+                        },
                     },
                 }),
                 this.prisma.task.count({ where }),

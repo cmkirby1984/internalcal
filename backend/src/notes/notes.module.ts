@@ -8,4 +8,3 @@ import { NotesController } from './notes.controller';
   exports: [NotesService],
 })
 export class NotesModule {}
-

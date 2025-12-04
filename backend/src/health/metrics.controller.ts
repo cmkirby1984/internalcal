@@ -78,7 +78,7 @@ export class MetricsController {
   @Get('prometheus')
   async getPrometheusMetrics(): Promise<string> {
     const metrics = await this.getMetrics();
-    
+
     const lines: string[] = [
       '# HELP motel_uptime_seconds Application uptime in seconds',
       '# TYPE motel_uptime_seconds gauge',
@@ -181,4 +181,3 @@ export class MetricsController {
     };
   }
 }
-

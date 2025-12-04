@@ -66,24 +66,36 @@ describe('SuiteStatusService', () => {
 
   describe('validateTransition', () => {
     it('should require cleaning task completion for VACANT_DIRTY -> VACANT_CLEAN', () => {
-      const result = service.validateTransition('VACANT_DIRTY', 'VACANT_CLEAN', {
-        hasCompletedCleaningTask: false,
-      });
+      const result = service.validateTransition(
+        'VACANT_DIRTY',
+        'VACANT_CLEAN',
+        {
+          hasCompletedCleaningTask: false,
+        },
+      );
       expect(result.valid).toBe(false);
       expect(result.reason).toContain('Cleaning task');
     });
 
     it('should pass when cleaning task is completed', () => {
-      const result = service.validateTransition('VACANT_DIRTY', 'VACANT_CLEAN', {
-        hasCompletedCleaningTask: true,
-      });
+      const result = service.validateTransition(
+        'VACANT_DIRTY',
+        'VACANT_CLEAN',
+        {
+          hasCompletedCleaningTask: true,
+        },
+      );
       expect(result.valid).toBe(true);
     });
 
     it('should require maintenance task completion for OUT_OF_ORDER -> VACANT_DIRTY', () => {
-      const result = service.validateTransition('OUT_OF_ORDER', 'VACANT_DIRTY', {
-        hasCompletedMaintenanceTask: false,
-      });
+      const result = service.validateTransition(
+        'OUT_OF_ORDER',
+        'VACANT_DIRTY',
+        {
+          hasCompletedMaintenanceTask: false,
+        },
+      );
       expect(result.valid).toBe(false);
       expect(result.reason).toContain('Maintenance task');
     });
@@ -159,4 +171,3 @@ describe('SuiteStatusService', () => {
     });
   });
 });
-

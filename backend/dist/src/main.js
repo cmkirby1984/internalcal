@@ -5,8 +5,28 @@ const swagger_1 = require("@nestjs/swagger");
 const app_module_1 = require("./app.module");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const allowedOrigins = process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+        : ['http://localhost:3000', 'http://localhost:3001'];
     app.enableCors({
-        origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+        origin: (origin, callback) => {
+            if (!origin) {
+                return callback(null, true);
+            }
+            const isAllowed = allowedOrigins.some((allowedOrigin) => {
+                const pattern = allowedOrigin
+                    .replace(/\./g, '\\.')
+                    .replace(/\*/g, '.*');
+                const regex = new RegExp(`^${pattern}$`);
+                return regex.test(origin);
+            });
+            if (isAllowed) {
+                callback(null, true);
+            }
+            else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
     });
     app.setGlobalPrefix('api');

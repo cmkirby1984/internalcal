@@ -82,11 +82,13 @@ export class SuitesService {
         },
       };
     } catch (error) {
-      this.logger.error(`Failed to fetch suites: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to fetch suites: ${error.message}`,
+        error.stack,
+      );
       throw new InternalServerErrorException('Failed to load suites.');
     }
   }
-
 
   async findOne(id: string) {
     const suite = await this.prisma.suite.findUnique({
@@ -134,7 +136,9 @@ export class SuitesService {
         where: { id },
         data: {
           ...rest,
-          ...(currentGuest !== undefined && { currentGuest: currentGuest as any }),
+          ...(currentGuest !== undefined && {
+            currentGuest: currentGuest as any,
+          }),
         },
       });
     } catch (error) {
@@ -204,4 +208,3 @@ export class SuitesService {
     };
   }
 }
-

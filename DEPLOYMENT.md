@@ -162,8 +162,9 @@ CORS_ORIGIN=http://localhost:3000,https://your-app.vercel.app,https://your-app-*
 | `REDIS_URL` | `${{Redis.REDIS_URL}}` | Auto-injected by Railway |
 | `NODE_ENV` | `production` | Node environment |
 | `PORT` | `3001` | Backend port |
-| `JWT_SECRET` | `<generated-secret>` | Generate with crypto |
-| `JWT_EXPIRES_IN` | `1d` | Token expiration |
+| `JWT_SECRET` | `<generated-secret>` | Generate with crypto (64+ chars) |
+| `JWT_EXPIRES_IN` | `1d` | Access token expiration |
+| `JWT_REFRESH_EXPIRES_IN` | `7d` | Refresh token expiration |
 | `CORS_ORIGIN` | `http://localhost:3000,https://...` | Allowed frontend origins |
 
 ### Frontend (Vercel)
@@ -171,6 +172,37 @@ CORS_ORIGIN=http://localhost:3000,https://your-app.vercel.app,https://your-app-*
 |----------|-------|-------------|
 | `NEXT_PUBLIC_API_URL` | `https://backend.railway.app/api` | Backend API endpoint |
 | `NEXT_PUBLIC_WS_URL` | `https://backend.railway.app` | WebSocket endpoint |
+
+---
+
+## Environment Sync Checklist
+
+Before deploying, ensure both Railway and Vercel share consistent configuration:
+
+### Critical Variables (must match)
+- [ ] `JWT_SECRET` - Same value on backend; frontend doesn't need it
+- [ ] `NEXT_PUBLIC_API_URL` - Points to your Railway backend `/api`
+- [ ] `CORS_ORIGIN` - Includes your Vercel production + preview URLs
+
+### Quick Verification Commands
+```bash
+# Test backend health (replace with your Railway URL)
+curl https://your-backend.up.railway.app/health/live
+
+# Test backend readiness (DB connection)
+curl https://your-backend.up.railway.app/health/ready
+
+# View metrics
+curl https://your-backend.up.railway.app/metrics
+```
+
+### Common Misconfiguration Symptoms
+| Symptom | Likely Cause |
+|---------|--------------|
+| 401 on all requests | `JWT_SECRET` mismatch or missing |
+| CORS errors in console | `CORS_ORIGIN` missing Vercel domain |
+| "Network Error" on login | `NEXT_PUBLIC_API_URL` incorrect or backend down |
+| WebSocket won't connect | `NEXT_PUBLIC_WS_URL` wrong or CORS issue |
 
 ---
 

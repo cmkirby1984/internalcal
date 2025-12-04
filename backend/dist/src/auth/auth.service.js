@@ -45,14 +45,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
 const employees_service_1 = require("../employees/employees.service");
 const argon2 = __importStar(require("argon2"));
 let AuthService = class AuthService {
     employeesService;
     jwtService;
-    constructor(employeesService, jwtService) {
+    configService;
+    constructor(employeesService, jwtService, configService) {
         this.employeesService = employeesService;
         this.jwtService = jwtService;
+        this.configService = configService;
     }
     async validateUser(username, password) {
         const employee = await this.employeesService.findByUsername(username);
@@ -76,8 +79,18 @@ let AuthService = class AuthService {
             role: employee.role,
             permissions: employee.permissions,
         };
+        const refreshPayload = {
+            sub: employee.id,
+            type: 'refresh',
+        };
+        const accessToken = this.jwtService.sign(payload);
+        const refreshExpiresIn = this.configService.get('JWT_REFRESH_EXPIRES_IN') || '7d';
+        const refreshToken = this.jwtService.sign(refreshPayload, {
+            expiresIn: refreshExpiresIn,
+        });
         return {
-            access_token: this.jwtService.sign(payload),
+            token: accessToken,
+            refreshToken,
             user: {
                 id: employee.id,
                 username: employee.username,
@@ -89,6 +102,40 @@ let AuthService = class AuthService {
             },
         };
     }
+    async refreshToken(refreshToken) {
+        try {
+            const decoded = this.jwtService.verify(refreshToken);
+            if (decoded.type !== 'refresh') {
+                throw new common_1.UnauthorizedException('Invalid token type');
+            }
+            const employee = await this.employeesService.findOne(decoded.sub);
+            if (!employee || employee.status === 'INACTIVE') {
+                throw new common_1.UnauthorizedException('User not found or inactive');
+            }
+            const payload = {
+                sub: employee.id,
+                username: employee.username,
+                role: employee.role,
+                permissions: employee.permissions,
+            };
+            const refreshPayload = {
+                sub: employee.id,
+                type: 'refresh',
+            };
+            const newAccessToken = this.jwtService.sign(payload);
+            const refreshExpiresIn = this.configService.get('JWT_REFRESH_EXPIRES_IN') || '7d';
+            const newRefreshToken = this.jwtService.sign(refreshPayload, {
+                expiresIn: refreshExpiresIn,
+            });
+            return {
+                token: newAccessToken,
+                refreshToken: newRefreshToken,
+            };
+        }
+        catch (error) {
+            throw new common_1.UnauthorizedException('Invalid or expired refresh token');
+        }
+    }
     async getProfile(userId) {
         return this.employeesService.findOne(userId);
     }
@@ -97,6 +144,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [employees_service_1.EmployeesService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        config_1.ConfigService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

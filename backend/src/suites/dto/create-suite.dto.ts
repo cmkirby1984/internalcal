@@ -8,11 +8,7 @@ import {
   IsObject,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  SuiteType,
-  SuiteStatus,
-  BedConfiguration,
-} from '@prisma/client';
+import { SuiteType, SuiteStatus, BedConfiguration } from '@prisma/client';
 
 export class CurrentGuestDto {
   @ApiPropertyOptional()
@@ -85,4 +81,3 @@ export class CreateSuiteDto {
   @IsString()
   notes?: string;
 }
-

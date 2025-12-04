@@ -41,10 +41,7 @@ export class NotesController {
   @Get()
   @ApiOperation({ summary: 'Get all notes with filtering and pagination' })
   @ApiResponse({ status: 200, description: 'List of notes' })
-  findAll(
-    @Query() filters: FilterNotesDto,
-    @CurrentUser('id') userId: string,
-  ) {
+  findAll(@Query() filters: FilterNotesDto, @CurrentUser('id') userId: string) {
     return this.notesService.findAll(filters, userId);
   }
 
@@ -139,4 +136,3 @@ export class NotesController {
     return this.notesService.remove(id);
   }
 }
-

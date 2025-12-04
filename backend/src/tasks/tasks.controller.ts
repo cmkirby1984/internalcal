@@ -9,12 +9,7 @@ import {
   Query,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, UpdateTaskDto, FilterTasksDto } from './dto';
 import { TaskStatus } from '@prisma/client';
@@ -117,4 +112,3 @@ export class TasksController {
     return this.tasksService.remove(id);
   }
 }
-

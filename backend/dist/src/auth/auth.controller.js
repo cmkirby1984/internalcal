@@ -27,6 +27,12 @@ let AuthController = class AuthController {
     login(loginDto) {
         return this.authService.login(loginDto);
     }
+    refresh(refreshTokenDto) {
+        return this.authService.refreshToken(refreshTokenDto.refreshToken);
+    }
+    logout() {
+        return { message: 'Logged out successfully' };
+    }
     getProfile(userId) {
         return this.authService.getProfile(userId);
     }
@@ -39,13 +45,37 @@ __decorate([
     (0, decorators_1.Public)(),
     (0, common_1.Post)('login'),
     (0, swagger_1.ApiOperation)({ summary: 'Login with username and password' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Login successful', type: dto_1.LoginResponseDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Login successful',
+        type: dto_1.LoginResponseDto,
+    }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid credentials' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [dto_1.LoginDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('refresh'),
+    (0, swagger_1.ApiOperation)({ summary: 'Refresh access token using refresh token' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Token refreshed successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid or expired refresh token' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [dto_1.RefreshTokenDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "refresh", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('logout'),
+    (0, swagger_1.ApiOperation)({ summary: 'Logout (client-side token invalidation)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Logout successful' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "logout", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('profile'),

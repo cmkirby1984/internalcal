@@ -126,7 +126,8 @@ export class TasksService {
       if (scheduledAfter || scheduledBefore) {
         where.scheduledStart = {};
         if (scheduledAfter) where.scheduledStart.gte = new Date(scheduledAfter);
-        if (scheduledBefore) where.scheduledStart.lte = new Date(scheduledBefore);
+        if (scheduledBefore)
+          where.scheduledStart.lte = new Date(scheduledBefore);
       }
 
       if (search) {
@@ -151,14 +152,20 @@ export class TasksService {
           orderBy,
           include: {
             suite: { select: { id: true, suiteNumber: true } },
-            assignedTo: { select: { id: true, firstName: true, lastName: true } },
-            assignedBy: { select: { id: true, firstName: true, lastName: true } },
+            assignedTo: {
+              select: { id: true, firstName: true, lastName: true },
+            },
+            assignedBy: {
+              select: { id: true, firstName: true, lastName: true },
+            },
           },
         }),
         this.prisma.task.count({ where }),
       ]);
 
-      this.logger.log(`Found ${total} tasks with filters: ${JSON.stringify(filters)}`);
+      this.logger.log(
+        `Found ${total} tasks with filters: ${JSON.stringify(filters)}`,
+      );
 
       return {
         data,
@@ -435,4 +442,3 @@ export class TasksService {
     };
   }
 }
-

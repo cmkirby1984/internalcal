@@ -251,6 +251,7 @@ export interface LoginCredentials {
 export interface AuthResponse {
   user: Employee;
   token: string;
+  refreshToken?: string;
 }
 
 export interface TokenPayload {

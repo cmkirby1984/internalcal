@@ -149,4 +149,3 @@ export class NotificationQueueService {
     return { waiting, active, completed, failed, delayed };
   }
 }
-

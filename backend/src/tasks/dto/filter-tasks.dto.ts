@@ -1,4 +1,10 @@
-import { IsOptional, IsEnum, IsUUID, IsDateString, IsString } from 'class-validator';
+import {
+  IsOptional,
+  IsEnum,
+  IsUUID,
+  IsDateString,
+  IsString,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { TaskType, TaskPriority, TaskStatus } from '@prisma/client';
 import { PaginationDto } from '../../common';
@@ -57,4 +63,3 @@ export class FilterTasksDto extends PaginationDto {
   @IsEnum(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc';
 }
-

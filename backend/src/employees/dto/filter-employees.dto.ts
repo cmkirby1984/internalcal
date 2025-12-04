@@ -31,4 +31,3 @@ export class FilterEmployeesDto extends PaginationDto {
   @IsString()
   search?: string;
 }
-

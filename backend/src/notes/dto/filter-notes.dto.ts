@@ -1,4 +1,10 @@
-import { IsOptional, IsEnum, IsUUID, IsBoolean, IsString } from 'class-validator';
+import {
+  IsOptional,
+  IsEnum,
+  IsUUID,
+  IsBoolean,
+  IsString,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { NoteType, NotePriority, NoteVisibility } from '@prisma/client';
@@ -52,4 +58,3 @@ export class FilterNotesDto extends PaginationDto {
   @IsString()
   tag?: string;
 }
-

@@ -54,11 +54,11 @@ import { SetupController } from './setup.controller';
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     },
-    // Uncomment to enable global JWT auth (all routes protected by default)
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard,
-    // },
+    // Global JWT auth - all routes protected by default, use @Public() to expose
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule {}

@@ -106,7 +106,11 @@ export class NotificationsService {
   }
 
   // Helper to send task-related notifications
-  async notifyTaskAssigned(taskId: string, assignedToId: string, taskTitle: string) {
+  async notifyTaskAssigned(
+    taskId: string,
+    assignedToId: string,
+    taskTitle: string,
+  ) {
     return this.create({
       recipientId: assignedToId,
       type: 'TASK_ASSIGNED',
@@ -119,7 +123,11 @@ export class NotificationsService {
     });
   }
 
-  async notifyEmergencyTask(taskId: string, taskTitle: string, recipientIds: string[]) {
+  async notifyEmergencyTask(
+    taskId: string,
+    taskTitle: string,
+    recipientIds: string[],
+  ) {
     const notifications = recipientIds.map((recipientId) => ({
       recipientId,
       type: 'EMERGENCY_TASK' as const,
@@ -135,4 +143,3 @@ export class NotificationsService {
     return this.createMany(notifications);
   }
 }
-

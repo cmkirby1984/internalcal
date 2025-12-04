@@ -8,4 +8,3 @@ import { RealtimeModule } from '../realtime/realtime.module';
   controllers: [HealthController, MetricsController],
 })
 export class HealthModule {}
-

@@ -10,4 +10,3 @@ import { DomainModule } from '../domain';
   exports: [TasksService],
 })
 export class TasksModule {}
-

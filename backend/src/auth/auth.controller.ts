@@ -6,7 +6,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResponseDto } from './dto';
+import { LoginDto, LoginResponseDto, RefreshTokenDto } from './dto';
 import { Public, CurrentUser } from './decorators';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
@@ -18,10 +18,33 @@ export class AuthController {
   @Public()
   @Post('login')
   @ApiOperation({ summary: 'Login with username and password' })
-  @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    type: LoginResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Public()
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+  refresh(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.authService.refreshToken(refreshTokenDto.refreshToken);
+  }
+
+  @Public()
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout (client-side token invalidation)' })
+  @ApiResponse({ status: 200, description: 'Logout successful' })
+  logout() {
+    // Stateless JWT - logout is handled client-side by clearing tokens
+    // For enhanced security, implement token blacklisting with Redis
+    return { message: 'Logged out successfully' };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -44,4 +67,3 @@ export class AuthController {
     return user;
   }
 }
-

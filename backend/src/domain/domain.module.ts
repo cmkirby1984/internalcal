@@ -87,4 +87,3 @@ import { RbacGuard, RolesGuard } from './rbac';
   ],
 })
 export class DomainModule {}
-

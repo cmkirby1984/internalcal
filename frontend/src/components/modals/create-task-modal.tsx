@@ -118,8 +118,26 @@ export function CreateTaskModal() {
         assignedToId: '',
         estimatedDuration: 30,
       });
+      setErrors({});
     } catch (error) {
-      // Error handling is done in the store
+      // Handle API validation errors
+      const apiError = error as { message?: string; statusCode?: number };
+      if (apiError.message) {
+        // Check if it's a validation error and try to map to specific field
+        const message = apiError.message.toLowerCase();
+        if (message.includes('title')) {
+          setErrors({ title: apiError.message });
+        } else if (message.includes('type')) {
+          setErrors({ type: apiError.message });
+        } else if (message.includes('suite')) {
+          setErrors({ suiteId: apiError.message });
+        } else if (message.includes('employee') || message.includes('assigned')) {
+          setErrors({ assignedToId: apiError.message });
+        } else {
+          // Generic error - show in title field area
+          setErrors({ _form: apiError.message });
+        }
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -148,6 +166,12 @@ export function CreateTaskModal() {
       }
     >
       <div className="space-y-4">
+        {/* Form-level error */}
+        {errors._form && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-red-600 text-sm">{errors._form}</p>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4">
           <Select
             label="Task Type"

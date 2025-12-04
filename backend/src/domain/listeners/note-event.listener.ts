@@ -44,7 +44,9 @@ export class NoteEventListener {
         })),
       });
 
-      this.logger.log(`Incident notifications sent to ${managers.length} managers`);
+      this.logger.log(
+        `Incident notifications sent to ${managers.length} managers`,
+      );
     }
   }
 
@@ -72,4 +74,3 @@ export class NoteEventListener {
     }
   }
 }
-

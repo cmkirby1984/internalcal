@@ -76,9 +76,7 @@ export class TaskEventListener {
    */
   @OnEvent(DomainEventNames.TASK_ASSIGNED)
   async handleTaskAssigned(event: TaskAssignedEvent) {
-    this.logger.log(
-      `Task assigned: ${event.title} to ${event.assignedToName}`,
-    );
+    this.logger.log(`Task assigned: ${event.title} to ${event.assignedToName}`);
 
     // Create notification for the assignee
     await this.prisma.notification.create({
@@ -135,4 +133,3 @@ export class TaskEventListener {
     }
   }
 }
-

@@ -9,14 +9,13 @@ import {
   Query,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { EmployeesService } from './employees.service';
-import { CreateEmployeeDto, UpdateEmployeeDto, FilterEmployeesDto } from './dto';
+import {
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+  FilterEmployeesDto,
+} from './dto';
 
 @ApiTags('Employees')
 @Controller('employees')
@@ -26,7 +25,10 @@ export class EmployeesController {
   @Post()
   @ApiOperation({ summary: 'Create a new employee' })
   @ApiResponse({ status: 201, description: 'Employee created successfully' })
-  @ApiResponse({ status: 409, description: 'Email/username/employee number already exists' })
+  @ApiResponse({
+    status: 409,
+    description: 'Email/username/employee number already exists',
+  })
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeesService.create(createEmployeeDto);
   }
@@ -53,7 +55,9 @@ export class EmployeesController {
   }
 
   @Get('available')
-  @ApiOperation({ summary: 'Get all available employees (on duty, no active tasks)' })
+  @ApiOperation({
+    summary: 'Get all available employees (on duty, no active tasks)',
+  })
   @ApiResponse({ status: 200, description: 'List of available employees' })
   getAvailable() {
     return this.employeesService.getAvailableEmployees();
@@ -117,4 +121,3 @@ export class EmployeesController {
     return this.employeesService.remove(id);
   }
 }
-

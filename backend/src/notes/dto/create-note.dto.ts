@@ -48,7 +48,10 @@ export class CreateNoteDto {
   @IsUUID()
   relatedEmployeeId?: string;
 
-  @ApiPropertyOptional({ enum: NoteVisibility, default: NoteVisibility.ALL_STAFF })
+  @ApiPropertyOptional({
+    enum: NoteVisibility,
+    default: NoteVisibility.ALL_STAFF,
+  })
   @IsOptional()
   @IsEnum(NoteVisibility)
   visibility?: NoteVisibility;
@@ -84,4 +87,3 @@ export class CreateNoteDto {
   @IsDateString()
   expiresAt?: string;
 }
-

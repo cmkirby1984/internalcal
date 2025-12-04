@@ -9,12 +9,7 @@ import {
   Query,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { SuitesService } from './suites.service';
 import { CreateSuiteDto, UpdateSuiteDto, FilterSuitesDto } from './dto';
 import { PaginationDto } from '../common/dto/pagination.dto'; // Added import
@@ -99,4 +94,3 @@ export class SuitesController {
     return this.suitesService.remove(id);
   }
 }
-

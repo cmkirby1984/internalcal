@@ -1,10 +1,12 @@
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { EmployeesService } from '../employees/employees.service';
 import { LoginDto } from './dto';
 export declare class AuthService {
     private readonly employeesService;
     private readonly jwtService;
-    constructor(employeesService: EmployeesService, jwtService: JwtService);
+    private readonly configService;
+    constructor(employeesService: EmployeesService, jwtService: JwtService, configService: ConfigService);
     validateUser(username: string, password: string): Promise<{
         id: string;
         employeeNumber: string;
@@ -34,7 +36,8 @@ export declare class AuthService {
         lastActive: Date | null;
     }>;
     login(loginDto: LoginDto): Promise<{
-        access_token: string;
+        token: string;
+        refreshToken: string;
         user: {
             id: string;
             username: string;
@@ -44,6 +47,10 @@ export declare class AuthService {
             role: import(".prisma/client").$Enums.EmployeeRole;
             permissions: string[];
         };
+    }>;
+    refreshToken(refreshToken: string): Promise<{
+        token: string;
+        refreshToken: string;
     }>;
     getProfile(userId: string): Promise<{
         id: string;

@@ -235,4 +235,3 @@ export class SuiteStatusService {
     return ['OCCUPIED_CLEAN', 'OCCUPIED_DIRTY'].includes(status);
   }
 }
-

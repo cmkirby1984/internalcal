@@ -19,4 +19,3 @@ import { RealtimeEventListener } from './realtime-event.listener';
   exports: [RealtimeGateway],
 })
 export class RealtimeModule {}
-

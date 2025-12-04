@@ -14,4 +14,3 @@ export class UpdateNoteDto extends PartialType(CreateNoteDto) {
   @IsBoolean()
   followUpCompleted?: boolean;
 }
-

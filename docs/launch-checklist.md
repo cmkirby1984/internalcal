@@ -82,12 +82,28 @@ This checklist ensures all critical items are verified before launching the Mote
 - [ ] Verify WebSocket connections working
 
 ### Smoke Tests (T+15 min)
+
+#### Backend (Railway)
+- [ ] Health check: `curl https://YOUR-BACKEND.up.railway.app/health/live` returns 200
+- [ ] Readiness check: `curl https://YOUR-BACKEND.up.railway.app/health/ready` returns `ready: true`
+- [ ] Metrics: `curl https://YOUR-BACKEND.up.railway.app/metrics` returns JSON
+- [ ] Swagger: `https://YOUR-BACKEND.up.railway.app/api/docs` loads
+- [ ] Auth: POST to `/api/auth/login` with valid credentials returns token
+
+#### Frontend (Vercel)
+- [ ] Homepage redirects to login for unauthenticated users
+- [ ] Login page loads without console errors
+- [ ] Login with seeded credentials (admin/admin123) works
+- [ ] Dashboard loads with sidebar and header visible
+- [ ] No CORS errors in browser console
+
+#### Full Flow Tests
 - [ ] Login functionality works
-- [ ] Dashboard loads with data
-- [ ] Can create a task
-- [ ] Can update suite status
-- [ ] Real-time updates working
-- [ ] Mobile/tablet views working
+- [ ] Dashboard loads with data (tasks count, suite status)
+- [ ] Can create a task (opens modal, fills form, submits)
+- [ ] Can update suite status (click suite, change status)
+- [ ] Real-time updates working (open two tabs, create task in one)
+- [ ] Mobile/tablet views working (resize browser, check sidebar)
 
 ### Monitoring (T+30 min)
 - [ ] No error spikes in logs
@@ -95,6 +111,25 @@ This checklist ensures all critical items are verified before launching the Mote
 - [ ] Database connections stable
 - [ ] Memory usage normal
 - [ ] No WebSocket disconnection spikes
+
+---
+
+### Automated Verification
+
+Run the deployment verification script:
+```bash
+# Make script executable (first time only)
+chmod +x scripts/verify-deployment.sh
+
+# Run verification
+./scripts/verify-deployment.sh https://YOUR-BACKEND.up.railway.app https://YOUR-APP.vercel.app
+```
+
+The script checks:
+- Backend health/readiness endpoints
+- Database connectivity
+- API authentication
+- Frontend accessibility
 
 ---
 
