@@ -57,8 +57,8 @@ USER nestjs
 # Expose port
 EXPOSE 3001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+# Health check - give app more time to start
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=5 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health/live || exit 1
 
 # Start the application
